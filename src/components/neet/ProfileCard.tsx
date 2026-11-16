@@ -140,6 +140,7 @@ export default function ProfileMenu() {
                       value={goal}
                       onChange={(e) => setGoal(e.target.value)}
                       maxLength={200}
+                      aria-label="Add a learning goal"
                       placeholder="Add a goal"
                       className="min-w-0 flex-1 rounded-full border border-line bg-bg px-3 py-1.5 text-sm outline-none focus:border-accent"
                     />

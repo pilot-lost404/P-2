@@ -84,18 +84,22 @@ export default function SignatureGate() {
         <div className="mt-2 h-28 rounded-2xl bg-surface">
           <AsciiSignature initials={initials} seed={seed} progress={progress} cell={7} />
         </div>
-        <label className="block text-sm">
+        <label htmlFor="signature-name" className="block text-sm">
           <span className="text-muted">Your name</span>
           <input
+            id="signature-name"
+            autoComplete="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={80}
             className="mt-1 w-full rounded-xl border border-line bg-bg px-3 py-2 outline-none focus:border-accent"
           />
         </label>
-        <label className="block text-sm">
+        <label htmlFor="signature-goal" className="block text-sm">
           <span className="text-muted">What do you want to be able to do?</span>
           <input
+            id="signature-goal"
+            aria-describedby="signature-goal-hint"
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
             maxLength={200}
@@ -103,6 +107,9 @@ export default function SignatureGate() {
             className="mt-1 w-full rounded-xl border border-line bg-bg px-3 py-2 outline-none focus:border-accent"
           />
         </label>
+        <p id="signature-goal-hint" className="-mt-1 text-xs text-muted">
+          One sentence. You can add two more later.
+        </p>
         <button
           type="button"
           disabled={!ready || saving}

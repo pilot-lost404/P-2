@@ -1,0 +1,17 @@
+# Static assets are served straight from Cloudflare's asset layer and never reach the
+# Worker, so they get their own headers here. Document responses get theirs from
+# src/lib/security-headers.ts, applied in src/server.ts — that is the file to edit for
+# CSP, HSTS and referrer policy. This one only covers the asset layer.
+#
+# Nitro appends its own cache rule for /assets/* to this file at build time.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Cross-Origin-Resource-Policy: same-origin
+
+/favicon.ico
+  Cache-Control: public, max-age=604800
+
+/robots.txt
+  Cache-Control: public, max-age=300

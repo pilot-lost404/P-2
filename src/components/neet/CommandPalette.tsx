@@ -45,6 +45,7 @@ export default function CommandPalette() {
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const items = useMemo<Item[]>(
     () => [
@@ -113,8 +114,36 @@ export default function CommandPalette() {
     };
   }, []);
 
+  // Focus management for a modal: send focus in on open, keep Tab inside it,
+  // and hand focus back to whatever opened it on close. Without the restore, a
+  // keyboard user lands back at <body> and loses their place in the page.
   useEffect(() => {
-    if (open) inputRef.current?.focus();
+    if (!open) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const panel = panelRef.current;
+    inputRef.current?.focus();
+
+    const onTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !panel) return;
+      const focusable = panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onTab);
+    return () => {
+      document.removeEventListener("keydown", onTab);
+      opener?.focus?.();
+    };
   }, [open]);
 
   function go(item?: Item) {
@@ -131,9 +160,10 @@ export default function CommandPalette() {
       onMouseDown={() => setOpen(false)}
     >
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Search"
+        aria-label="Search lessons, paths and pages"
         className="w-full max-w-xl overflow-hidden rounded-3xl bg-surface shadow-2xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -154,10 +184,15 @@ export default function CommandPalette() {
             } else if (e.key === "Enter") go(results[active]);
           }}
           placeholder="Search lessons, paths, labs…"
-          aria-label="Search"
+          aria-label="Search lessons, paths and pages"
+          role="combobox"
+          aria-expanded="true"
+          aria-controls="palette-results"
+          aria-autocomplete="list"
+          aria-activedescendant={results[active] ? `palette-opt-${active}` : undefined}
           className="w-full border-b border-line bg-transparent px-5 py-4 text-lg text-text placeholder:text-muted focus:outline-none"
         />
-        <ul role="listbox" className="max-h-80 overflow-auto p-2">
+        <ul id="palette-results" role="listbox" className="max-h-80 overflow-auto p-2">
           {results.length === 0 && (
             <li className="px-3 py-6 text-center text-muted">
               Nothing found for &ldquo;{q}&rdquo;.
@@ -166,6 +201,7 @@ export default function CommandPalette() {
           {results.map((r, i) => (
             <li
               key={r.href + r.label}
+              id={`palette-opt-${i}`}
               role="option"
               aria-selected={i === active}
               onMouseEnter={() => setActive(i)}

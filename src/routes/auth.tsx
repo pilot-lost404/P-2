@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage } from "@/hooks/use-session";
@@ -22,6 +22,8 @@ function safeRedirect(r?: string) {
   }
 }
 
+type FieldError = { message: string; field?: string };
+
 function AuthPage() {
   const { redirect, mode: initial } = Route.useSearch();
   const navigate = useNavigate();
@@ -30,7 +32,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<FieldError | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,20 +42,37 @@ function AuthPage() {
     });
   }, [navigate, redirect]);
 
+  // Submitting should never leave a keyboard or screen-reader user stranded: if we know
+  // which field failed, move focus there so the error is read out with the input.
+  const errorRef = useRef<string | null>(null);
+  useEffect(() => {
+    const field = errorRef.current;
+    if (!field || !error) return;
+    document.getElementById(`auth-${field}`)?.focus();
+    errorRef.current = null;
+  }, [error]);
+
+  const fail = (field: string, message: string) => {
+    errorRef.current = field;
+    setError({ message, field });
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setNotice(null);
     const em = email.trim().toLowerCase();
-    if (!/^\S+@\S+\.\S+$/.test(em)) return setError("Enter a valid email address.");
+    if (!/^\S+@\S+\.\S+$/.test(em))
+      return fail("email", "Enter a valid email address, like name@example.com.");
     if (mode !== "forgot" && password.length < 8)
-      return setError("Password must be at least 8 characters.");
+      return fail("password", "Password must be at least 8 characters.");
     if (mode === "signup" && !name.trim())
-      return setError("Tell us your name — your signature is made from your initials.");
+      return fail("name", "Tell us your name — your signature is made from your initials.");
     if (!supabaseConfigured) {
-      setError(
-        "Accounts aren't configured on this deployment yet. You can still learn — progress is saved in this browser.",
-      );
+      setError({
+        message:
+          "Accounts aren't configured on this deployment yet. You can still learn — progress is saved in this browser.",
+      });
       return;
     }
     setBusy(true);
@@ -82,7 +101,7 @@ function AuthPage() {
         setNotice("If that email has an account, a reset link is on its way.");
       }
     } catch (err) {
-      setError(authErrorMessage(err));
+      setError({ message: authErrorMessage(err) });
     } finally {
       setBusy(false);
     }
@@ -126,21 +145,47 @@ function AuthPage() {
 
       <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
         {mode === "signup" && (
-          <Field label="Full name" value={name} onChange={setName} autoComplete="name" />
+          <Field
+            id="auth-name"
+            label="Full name"
+            value={name}
+            onChange={setName}
+            autoComplete="name"
+            invalid={error?.field === "name"}
+            describedBy={error?.field === "name" ? "auth-error" : undefined}
+            hint="Your signature is made from your initials."
+          />
         )}
-        <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" />
+        <Field
+          id="auth-email"
+          label="Email"
+          type="email"
+          value={email}
+          onChange={setEmail}
+          autoComplete="email"
+          invalid={error?.field === "email"}
+          describedBy={error?.field === "email" ? "auth-error" : undefined}
+        />
         {mode !== "forgot" && (
           <Field
+            id="auth-password"
             label="Password"
             type="password"
             value={password}
             onChange={setPassword}
             autoComplete={mode === "signin" ? "current-password" : "new-password"}
+            invalid={error?.field === "password"}
+            describedBy={error?.field === "password" ? "auth-error" : undefined}
+            hint={mode === "signup" ? "At least 8 characters." : undefined}
           />
         )}
         {error && (
-          <p role="alert" className="rounded-2xl bg-surface-2 px-4 py-3 text-sm text-text">
-            {error}
+          <p
+            id="auth-error"
+            role="alert"
+            className="rounded-2xl bg-surface-2 px-4 py-3 text-sm text-text"
+          >
+            {error.message}
           </p>
         )}
         {notice && (
@@ -176,30 +221,51 @@ function AuthPage() {
 }
 
 function Field({
+  id,
   label,
   value,
   onChange,
   type = "text",
   autoComplete,
+  invalid = false,
+  describedBy,
+  hint,
 }: {
+  id: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
   autoComplete?: string;
+  invalid?: boolean | undefined;
+  describedBy?: string | undefined;
+  hint?: string | undefined;
 }) {
   return (
-    <label className="block">
-      <span className="text-sm text-muted">{label}</span>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        autoComplete={autoComplete}
-        required
-        className="mt-1 w-full rounded-2xl border border-line bg-bg px-4 py-3 outline-none transition focus:border-accent"
-      />
-    </label>
+    <div className="block">
+      <label htmlFor={id} className="block">
+        <span className="text-sm text-muted">{label}</span>
+        <input
+          id={id}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete={autoComplete}
+          required
+          aria-required="true"
+          aria-invalid={invalid || undefined}
+          aria-describedby={describedBy}
+          className={`mt-1 w-full rounded-2xl border bg-bg px-4 py-3 outline-none transition focus:border-accent ${
+            invalid ? "border-warn" : "border-line"
+          }`}
+        />
+      </label>
+      {hint && (
+        <p id={`${id}-hint`} className="mt-1 text-xs text-muted">
+          {hint}
+        </p>
+      )}
+    </div>
   );
 }
 

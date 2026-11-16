@@ -64,18 +64,27 @@ function ResetPage() {
         <p className="mt-4 text-muted">Open this page from the reset link in your email.</p>
       ) : (
         <form onSubmit={submit} className="mt-8 space-y-4">
-          <label className="block">
+          <label htmlFor="new-password" className="block">
             <span className="text-sm text-muted">New password</span>
             <input
+              id="new-password"
               type="password"
               value={pw}
               onChange={(e) => setPw(e.target.value)}
               autoComplete="new-password"
-              className="mt-1 w-full rounded-2xl border border-line bg-bg px-4 py-3 outline-none focus:border-accent"
+              aria-required="true"
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? "reset-error" : "reset-hint"}
+              className={`mt-1 w-full rounded-2xl border bg-bg px-4 py-3 outline-none focus:border-accent ${
+                error ? "border-warn" : "border-line"
+              }`}
             />
           </label>
+          <p id="reset-hint" className="text-xs text-muted">
+            At least 8 characters. Paste from a password manager is fine.
+          </p>
           {error && (
-            <p role="alert" className="text-sm text-text">
+            <p id="reset-error" role="alert" className="text-sm text-text">
               {error}
             </p>
           )}

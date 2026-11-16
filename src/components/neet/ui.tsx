@@ -48,6 +48,7 @@ export function SearchField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
         className="w-full rounded-full border border-line bg-surface py-3 pl-11 pr-4 text-base text-text outline-none transition placeholder:text-muted focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:bg-bg"
       />
     </label>
