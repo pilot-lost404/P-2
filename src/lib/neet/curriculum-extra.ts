@@ -233,7 +233,7 @@ export const EXTENSION_LESSONS: Record<string, Lesson[]> = {
         {
           t: "callout",
           title: "Where this goes next",
-          text: "The practice lab for this path asks you to defend one intervention against exactly this resistance. Read Volume 02 (Systems Thinking) in the library for the full treatment of leverage and delay.",
+          text: "The practice lab for this path (lab-leverage, on the Labs page) asks you to rank twelve interventions and defend one against exactly this kind of resistance. Volume 02 — Systems Thinking in the library has the full treatment of leverage and delay.",
         },
       ],
     },

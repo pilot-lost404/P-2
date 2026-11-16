@@ -88,6 +88,33 @@ calibration gap, and the step-ordering rules above.
 `react-refresh` warnings) · production build ok. Crawl of all 170 sitemap URLs plus
 every `/learn/*` link: all 200. Unknown paths return 404.
 
+## Unreleased — hygiene and honesty
+
+- **`bun.lock` was stale.** It still pinned the 28 packages removed in `a187555` and never saw
+  the vite 8 / zod 4 upgrades, so a Bun install would have reinstated the advisories that
+  commit fixed. `package-lock.json` is now the only lockfile; `package.json` declares
+  `packageManager` and `engines`. `bunfig.toml` stays for the 24h supply-chain guard.
+- **Both generators could corrupt the tree.** `generate_source_enrichment.js` emitted an
+  older `getSourcesForArticle` than the committed file (no body-aware citation scan), so
+  regenerating would have silently deleted working behaviour and broken three tests; it now
+  emits what actually ships, formats its own output, and reads `content/pack/` instead of
+  the byte-identical `SS_content/` copy that has been deleted.
+  `gen-pack-data.mjs` emitted a blank line prettier rejects and a blanket `eslint-disable`
+  that had become unused, so `npm run pack` used to leave the tree failing `npm run lint`.
+- **`/coverage` no longer shows its own build log.** 13 of the 44 metadata notes were
+  per-pass count reconciliations that disagree with each other (252 → 275 → 283 → 292 →
+  320 → 322 sources) and read as claims about the current pack. They moved to
+  `PACK_CHANGELOG.md` (outside `content/pack/`, where every `.md` is counted as a volume).
+- **`/sources` gained the caveat the metadata already carried**: standards are
+  licensed/paywalled, scope is summarised, editions must be checked with the issuer.
+- **`/reset-password` crashed without Supabase env vars** — it imported the generated client
+  at module scope, and that client throws on first access. It now loads lazily behind
+  `supabaseConfigured`.
+- **The sitemap advertised a host that does not exist.** `neet-learning.pages.dev` was
+  hard-coded as the fallback origin, so all 170 `<loc>` entries and every canonical link
+  pointed somewhere this site is not served from. No fallback now: set `VITE_SITE_URL` for
+  absolute URLs, otherwise they stay relative. `.env.example` documents the variables.
+
 ## `a187555` — Tech stack deep dive
 
 Researched TanStack Start, Cloudflare Workers limits and the 2026 Supabase guidance;
