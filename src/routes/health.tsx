@@ -6,10 +6,11 @@ import { pageHead } from "@/lib/neet/meta";
 
 export const Route = createFileRoute("/health")({
   loader: () => getHealth(),
-  head: () =>
+  head: ({ match }) =>
     pageHead(
       "Content status",
       "Whether the knowledge pack loaded intact: volumes, sources and how many have been verified.",
+      match.pathname,
     ),
   errorComponent: ({ error }) => <LoadError error={error} />,
   component: ContentStatus,

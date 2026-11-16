@@ -6,10 +6,11 @@ import { pageHead } from "@/lib/neet/meta";
 
 export const Route = createFileRoute("/coverage")({
   loader: () => getCoverage(),
-  head: () =>
+  head: ({ match }) =>
     pageHead(
       "Research coverage",
       "How deep each domain goes, what evidence backs it, and which gaps remain.",
+      match.pathname,
     ),
   errorComponent: ({ error }) => <LoadError error={error} />,
   component: Coverage,

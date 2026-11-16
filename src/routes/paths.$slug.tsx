@@ -146,7 +146,11 @@ export const Route = createFileRoute("/paths/$slug")({
     if (!path) throw notFound();
     return { path };
   },
-  head: ({ loaderData }) =>
-    pageHead(loaderData?.path.title ?? "Path", loaderData?.path.tagline ?? "A learning path."),
+  head: ({ loaderData, match }) =>
+    pageHead(
+      loaderData?.path.title ?? "Path",
+      loaderData?.path.tagline ?? "A learning path.",
+      match.pathname,
+    ),
   component: PathPage,
 });

@@ -6,10 +6,11 @@ import { pageHead } from "@/lib/neet/meta";
 
 export const Route = createFileRoute("/careers")({
   loader: () => listRoles(),
-  head: () =>
+  head: ({ match }) =>
     pageHead(
       "Career roles",
       "Systems roles with competency areas, deliverables and a portfolio project for each.",
+      match.pathname,
     ),
   errorComponent: ({ error }) => <LoadError error={error} />,
   component: Careers,

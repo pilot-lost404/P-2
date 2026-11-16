@@ -13,10 +13,11 @@ export const Route = createFileRoute("/library/")({
     track: typeof s["track"] === "string" ? s["track"] : undefined,
   }),
   loader: () => listArticles(),
-  head: () =>
+  head: ({ match }) =>
     pageHead(
       "Knowledge library",
       "Every volume of the systems design, systems thinking and systems engineering knowledge pack.",
+      match.pathname,
     ),
   errorComponent: ({ error }) => <LoadError error={error} />,
   component: Library,

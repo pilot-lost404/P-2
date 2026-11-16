@@ -19,9 +19,32 @@ export function absoluteUrl(path: string) {
   return SITE_URL ? `${SITE_URL}${path}` : path;
 }
 
-export function pageHead(title: string, description: string, path?: string) {
+/**
+ * Normalise a pathname into the one canonical form we advertise.
+ *
+ * Research consensus on duplicate URLs is that you pick one form and apply it to canonicals,
+ * internal links, the sitemap and redirects alike; if those disagree, a search engine is free
+ * to ignore the one you declared. Routing already collapses a trailing slash with a 307, so
+ * the remaining divergence is letter case — TanStack's router ignores it, so `/Paths` and
+ * `/paths` both render. Lower-casing here means every case variant points at one URL instead
+ * of each page claiming to be its own canonical.
+ */
+export function canonicalPath(pathname: string) {
+  const trimmed = pathname
+    .replace(/\/{2,}/g, "/")
+    .replace(/\/+$/, "")
+    .toLowerCase();
+  return trimmed === "" ? "/" : trimmed;
+}
+
+/**
+ * Head tags for a page. `pathname` should come from the router's `match.pathname` so the
+ * canonical is the page's own URL — hand-passed paths drift out of date the moment a route
+ * moves, and a stale canonical is worse than none.
+ */
+export function pageHead(title: string, description: string, pathname?: string) {
   const full = `${title} · ${SITE}`;
-  const canonical = path ? absoluteUrl(path) : undefined;
+  const canonical = pathname ? absoluteUrl(canonicalPath(pathname)) : undefined;
   return {
     links: canonical ? [{ rel: "canonical", href: canonical }] : [],
     meta: [

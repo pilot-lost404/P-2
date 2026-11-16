@@ -7,10 +7,11 @@ import { pageHead } from "@/lib/neet/meta";
 
 export const Route = createFileRoute("/sources")({
   loader: () => listSources(),
-  head: () =>
+  head: ({ match }) =>
     pageHead(
       "Source library",
       "Every referenced handbook, standard, paper and course with its quality signal, scrape audit and cross-volume citations.",
+      match.pathname,
     ),
   errorComponent: ({ error }) => <LoadError error={error} />,
   component: Sources,

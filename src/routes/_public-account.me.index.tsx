@@ -95,6 +95,7 @@ function MePage() {
 }
 
 export const Route = createFileRoute("/_public-account/me/")({
-  head: () => pageHead("My progress", "Your daily progress, streaks and Proceed Scale."),
+  head: ({ match }) =>
+    pageHead("My progress", "Your daily progress, streaks and Proceed Scale.", match.pathname),
   component: MePage,
 });

@@ -271,10 +271,11 @@ function Field({
 
 export const Route = createFileRoute("/auth")({
   validateSearch: search,
-  head: () =>
+  head: ({ match }) =>
     pageHead(
       "Sign in",
       "Sign in or create a NEET account to save your progress, goals and signature.",
+      match.pathname,
     ),
   component: AuthPage,
 });

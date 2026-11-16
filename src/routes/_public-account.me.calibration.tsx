@@ -19,6 +19,7 @@ function CalibrationPage() {
 }
 
 export const Route = createFileRoute("/_public-account/me/calibration")({
-  head: () => pageHead("Calibration", "How sure you were, against how right you were."),
+  head: ({ match }) =>
+    pageHead("Calibration", "How sure you were, against how right you were.", match.pathname),
   component: CalibrationPage,
 });

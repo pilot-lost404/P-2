@@ -125,7 +125,11 @@ export const Route = createFileRoute("/_public-account/learn/$path/$lesson")({
       next: i < flat.length - 1 ? { path: path.slug, lesson: flat[i + 1]!.lesson } : null,
     };
   },
-  head: ({ loaderData }) =>
-    pageHead(loaderData?.lesson.title ?? "Lesson", loaderData?.lesson.summary ?? "A short lesson."),
+  head: ({ loaderData, match }) =>
+    pageHead(
+      loaderData?.lesson.title ?? "Lesson",
+      loaderData?.lesson.summary ?? "A short lesson.",
+      match.pathname,
+    ),
   component: LessonPage,
 });

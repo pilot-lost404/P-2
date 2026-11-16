@@ -98,6 +98,7 @@ function ResetPage() {
 }
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => pageHead("Reset password", "Choose a new password for your NEET account."),
+  head: ({ match }) =>
+    pageHead("Reset password", "Choose a new password for your NEET account.", match.pathname),
   component: ResetPage,
 });

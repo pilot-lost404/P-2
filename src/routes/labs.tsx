@@ -24,7 +24,11 @@ function LabsPage() {
 }
 
 export const Route = createFileRoute("/labs")({
-  head: () =>
-    pageHead("Practice labs", "Hands-on labs with a twist that produce real evidence of skill."),
+  head: ({ match }) =>
+    pageHead(
+      "Practice labs",
+      "Hands-on labs with a twist that produce real evidence of skill.",
+      match.pathname,
+    ),
   component: LabsPage,
 });

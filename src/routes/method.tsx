@@ -107,10 +107,11 @@ Level 4  mastery ≥ 0.80 and an artifact`}</pre>
 }
 
 export const Route = createFileRoute("/method")({
-  head: () =>
+  head: ({ match }) =>
     pageHead(
       "The method",
       "The Proceed Scale: Search, Know, Adapt, Proceed. Progress backed by evidence.",
+      match.pathname,
     ),
   component: MethodPage,
 });

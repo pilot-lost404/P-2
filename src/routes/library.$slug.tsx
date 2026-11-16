@@ -16,11 +16,11 @@ export const Route = createFileRoute("/library/$slug")({
     if (!data) throw notFound();
     return data;
   },
-  head: ({ loaderData }) =>
+  head: ({ loaderData, match }) =>
     pageHead(
       loaderData?.article.title ?? "Library",
       loaderData?.article.summary.slice(0, 160) || "A volume from the knowledge pack.",
-      loaderData ? `/library/${loaderData.article.slug}` : undefined,
+      match.pathname,
     ),
   errorComponent: ({ error }) => <LoadError error={error} />,
   notFoundComponent: () => (

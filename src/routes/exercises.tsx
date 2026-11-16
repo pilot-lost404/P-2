@@ -6,10 +6,11 @@ import { pageHead } from "@/lib/neet/meta";
 
 export const Route = createFileRoute("/exercises")({
   loader: () => listPrompts(),
-  head: () =>
+  head: ({ match }) =>
     pageHead(
       "Design exercises",
       "Practice prompts from URL shorteners to safety cases, each with concepts and required artifacts.",
+      match.pathname,
     ),
   errorComponent: ({ error }) => <LoadError error={error} />,
   component: Exercises,

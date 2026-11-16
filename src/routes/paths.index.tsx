@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Link from "@/components/neet/AppLink";
 import { DISCIPLINES, PATHS, flatLessons, pathMinutes } from "@/lib/neet/content";
+import { absoluteUrl, canonicalPath } from "@/lib/neet/meta";
 
 export const Route = createFileRoute("/paths/")({
-  head: () => ({
+  head: ({ match }) => ({
     meta: [
       { title: "Learning paths · NEET" },
       {
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/paths/")({
           "Eleven paths across systems thinking, system design and systems engineering — each with lessons, a practice lab and one artefact.",
       },
     ],
+    links: [{ rel: "canonical", href: absoluteUrl(canonicalPath(match.pathname)) }],
   }),
   component: PathsIndex,
 });

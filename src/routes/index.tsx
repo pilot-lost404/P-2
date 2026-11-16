@@ -4,9 +4,10 @@ import PathCard from "@/components/neet/PathCard";
 import { SpotlightCard } from "@/components/neet/fx";
 import { DISCIPLINES, LABS, PATHS, STAGES, allLessons, pathMinutes } from "@/lib/neet/content";
 import { packCounts } from "@/lib/neet/pack-counts.generated";
+import { absoluteUrl, canonicalPath } from "@/lib/neet/meta";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
+  head: ({ match }) => ({
     meta: [
       { title: "NEET — learn systems thinking, system design & systems engineering" },
       {
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: absoluteUrl(canonicalPath(match.pathname)) }],
   }),
   component: Home,
 });
