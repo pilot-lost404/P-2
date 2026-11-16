@@ -37,7 +37,12 @@ function contentSecurityPolicy(): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self'",
-    `connect-src 'self'${supabase ? ` ${supabase}` : ""}`,
+    // The Supabase origin covers REST, Realtime and Auth. The websocket scheme is listed
+    // separately because `connect-src` matches schemes exactly, and a rotated project URL
+    // would otherwise break live updates with a silent CSP violation rather than an error.
+    supabase
+      ? `connect-src 'self' ${supabase} wss://${new URL(supabase).host}`
+      : "connect-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -63,12 +68,6 @@ export function securityHeaders(): Record<string, string> {
 }
 
 /**
- * Returns a response with the security headers applied.
- *
- * Redirects and 304s keep their status; the headers are added without touching the body,
- * so streaming responses (HTML, sitemap XML) are not buffered.
- */
-/**
  * Pages that render anything about the signed-in person, or that hold a form with a
  * secret in it. These must never be stored by a shared cache, and must not be replayed
  * from a browser cache after sign-out. `private, no-store` covers both.
@@ -86,6 +85,12 @@ export function cacheControlFor(pathname: string): string {
   return "public, max-age=0, must-revalidate";
 }
 
+/**
+ * Returns a response with the security headers applied.
+ *
+ * Redirects and 304s keep their status; the headers are added without touching the body,
+ * so streaming responses (HTML, sitemap XML) are not buffered.
+ */
 export function applySecurityHeaders(
   response: Response,
   headers = securityHeaders(),

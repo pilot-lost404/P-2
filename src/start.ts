@@ -18,16 +18,6 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
   }
 });
 
-const securityHeadersMiddleware = createMiddleware().server(async ({ next }) => {
-  const result = await next();
-  if (result instanceof Response) {
-    result.headers.set("X-Content-Type-Options", "nosniff");
-    result.headers.set("X-Frame-Options", "SAMEORIGIN");
-    result.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  }
-  return result;
-});
-
 // Start installs this automatically when src/start.ts is absent; defining the
 // file opts out, so re-add it explicitly to keep server functions protected
 // from cross-site requests.
@@ -35,7 +25,11 @@ const csrfMiddleware = createCsrfMiddleware({
   filter: (ctx) => ctx.handlerType === "serverFn",
 });
 
+// Response headers do NOT belong here. Request middleware is compiled into the bundle but
+// does not run for document responses in this app, so a securityHeadersMiddleware here
+// looked wired-up while shipping HTML with no headers at all. The contract lives in
+// src/lib/security-headers.ts and is applied in src/server.ts, which sees every response.
 export const startInstance = createStart(() => ({
   functionMiddleware: [attachSupabaseAuth],
-  requestMiddleware: [errorMiddleware, securityHeadersMiddleware, csrfMiddleware],
+  requestMiddleware: [errorMiddleware, csrfMiddleware],
 }));

@@ -78,26 +78,43 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "NEET: we ain't an academy, we're a group" },
-      {
-        name: "description",
-        content: "A group learning systems thinking, system design and engineering by building.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-    ],
-  }),
+  head: ({ matches }) => {
+    // An unmatched URL renders the not-found boundary, but the root head still applies — so
+    // without this branch a 404 shipped the homepage's title and description. That is a real
+    // SEO defect: a mistyped or dead URL looks like a thin duplicate of the home page, and a
+    // crawler has no reason to drop it. A 404 must say it is a 404 and ask not to be indexed.
+    // Two shapes to check: a route-level boundary sets `status: "notFound"`, but when the
+    // boundary is the root itself the router instead keeps `status: "success"` and sets an
+    // internal `_notFound` flag. Both mean "this URL does not exist".
+    const notFound = matches.some(
+      (m) => m.status === "notFound" || (m as { _notFound?: boolean })._notFound === true,
+    );
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        ...(notFound
+          ? [{ title: "Page not found · NEET" }, { name: "robots", content: "noindex" }]
+          : [
+              { title: "NEET: we ain't an academy, we're a group" },
+              {
+                name: "description",
+                content:
+                  "A group learning systems thinking, system design and engineering by building.",
+              },
+              { property: "og:type", content: "website" },
+              { name: "twitter:card", content: "summary_large_image" },
+            ]),
+      ],
+      links: [
+        {
+          rel: "stylesheet",
+          href: appCss,
+        },
+        { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      ],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
