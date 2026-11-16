@@ -1,4 +1,5 @@
 import type { Discipline, Lab, Path, Skill, Stage } from "./types";
+import { EXTENSION_LESSONS, SCALING_LESSONS, SHIPPING_LESSONS } from "./curriculum-extra";
 
 export const SITE = {
   name: "NEET",
@@ -1432,6 +1433,12 @@ export const PATHS: Path[] = [
           },
         ],
       },
+      {
+        slug: "from-model-to-action",
+        title: "From model to action",
+        summary: "A model earns its keep when it predicts.",
+        lessons: [...(EXTENSION_LESSONS["systems-thinking-fundamentals"] ?? [])],
+      },
     ],
   },
   {
@@ -1493,6 +1500,12 @@ export const PATHS: Path[] = [
           },
         ],
       },
+      {
+        slug: "scale",
+        title: "Scale it",
+        summary: "Caching is a correctness trade dressed as a performance trick.",
+        lessons: [...SCALING_LESSONS],
+      },
     ],
   },
   {
@@ -1551,6 +1564,12 @@ export const PATHS: Path[] = [
             ],
           },
         ],
+      },
+      {
+        slug: "ship",
+        title: "Ship it",
+        summary: "The thinnest slice that a real user can finish.",
+        lessons: [...SHIPPING_LESSONS],
       },
     ],
   },
@@ -1760,4 +1779,15 @@ export function pathMinutes(path: Path) {
 
 export function skillById(id: string) {
   return SKILLS.find((s) => s.id === id);
+}
+
+/** Labs that assess a skill. A lesson should point at these so practice follows reading. */
+export function labsForSkill(skillId: string) {
+  return LABS.filter((l) => l.skillId === skillId);
+}
+
+/** Every lab a learner can attempt after finishing this path, in skill order. */
+export function labsForPath(path: Path) {
+  const skills = new Set(flatLessons(path).flatMap((x) => x.lesson.skillIds));
+  return LABS.filter((l) => skills.has(l.skillId));
 }

@@ -13,4 +13,6 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://neet-learning.pages.dev/sitemap.xml
+# Point this at your deployed origin, e.g. `Sitemap: https://example.org/sitemap.xml`.
+# Left as a relative path so no dead host is advertised.
+Sitemap: /sitemap.xml

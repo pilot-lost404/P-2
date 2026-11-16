@@ -3,13 +3,22 @@ import { pageHead } from "@/lib/neet/meta";
 import Breadcrumbs from "@/components/neet/Breadcrumbs";
 import RoadmapAccordion from "@/components/neet/RoadmapAccordion";
 import StartButton, { PathProgressSummary } from "@/components/neet/StartButton";
-import { DISCIPLINES, PATHS, flatLessons, pathMinutes, skillById } from "@/lib/neet/content";
+import Link from "@/components/neet/AppLink";
+import {
+  DISCIPLINES,
+  PATHS,
+  flatLessons,
+  labsForPath,
+  pathMinutes,
+  skillById,
+} from "@/lib/neet/content";
 
 function PathPage() {
   const { path } = Route.useLoaderData();
 
   const lessons = flatLessons(path);
   const skillIds = Array.from(new Set(lessons.flatMap((x) => x.lesson.skillIds)));
+  const labs = labsForPath(path);
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-12">
@@ -91,6 +100,28 @@ function PathPage() {
               This is the evidence that moves a skill to Proceed.
             </p>
           </section>
+          {labs.length > 0 && (
+            <section className="rounded-3xl bg-surface p-6">
+              <h2 className="font-label text-sm uppercase tracking-widest text-muted">
+                Practice at the end
+              </h2>
+              <ul className="mt-3 space-y-2">
+                {labs.map((lab) => (
+                  <li key={lab.id}>
+                    <Link
+                      href={`/labs#${lab.id}`}
+                      className="flex min-h-11 items-center gap-2 rounded-md text-text hover:underline"
+                    >
+                      <span aria-hidden className="text-accent">
+                        →
+                      </span>
+                      {lab.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           <section className="rounded-3xl bg-surface p-6">
             <h2 className="font-label text-sm uppercase tracking-widest text-muted">
               Skills you build

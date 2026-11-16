@@ -8,7 +8,7 @@ import Markdown from "@/components/neet/Markdown";
 import { slugify } from "@/components/neet/LessonBlocks";
 import { LoadError } from "@/components/neet/ui";
 import { getArticle } from "@/lib/neet/library.functions";
-import { SITE_URL, pageHead } from "@/lib/neet/meta";
+import { absoluteUrl, pageHead } from "@/lib/neet/meta";
 
 export const Route = createFileRoute("/library/$slug")({
   loader: async ({ params }) => {
@@ -62,8 +62,10 @@ function ArticleJsonLd({ title, summary, slug }: { title: string; summary: strin
     "@type": "Article",
     headline: title,
     description: summary,
-    url: `${SITE_URL}/library/${slug}`,
-    isPartOf: { "@type": "WebSite", name: "NEET", url: SITE_URL },
+    url: absoluteUrl(`/library/${slug}`),
+    ...(absoluteUrl("/") && {
+      isPartOf: { "@type": "WebSite", name: "NEET", url: absoluteUrl("/") },
+    }),
     inLanguage: "en",
     isAccessibleForFree: true,
   };

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Link from "@/components/neet/AppLink";
-import { PATHS } from "@/lib/neet/content";
+import { DISCIPLINES, PATHS, flatLessons, pathMinutes } from "@/lib/neet/content";
 
 export const Route = createFileRoute("/paths/")({
   head: () => ({
@@ -44,6 +44,10 @@ function PathsIndex() {
               </div>
               <h2 className="mt-3 text-xl font-semibold leading-snug text-text">{p.title}</h2>
               <p className="mt-2 flex-1 text-sm leading-6 text-muted">{p.tagline}</p>
+              <p className="mt-3 font-label text-xs text-muted">
+                {DISCIPLINES[p.discipline].label} · {flatLessons(p).length} lessons · ~
+                {Math.max(1, Math.round(pathMinutes(p) / 60))}h
+              </p>
               <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-text">
                 Open path
                 <span

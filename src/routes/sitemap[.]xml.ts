@@ -1,18 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PATHS, allLessons, lessonHref } from "@/lib/neet/content";
 import { listArticles } from "@/lib/neet/library.functions";
-import { SITE_URL } from "@/lib/neet/meta";
+import { absoluteUrl } from "@/lib/neet/meta";
 
 /**
  * /sitemap.xml
  *
- * The site is a 120-volume reference library plus 26 lessons; without a sitemap none of
+ * The site is a 120-volume reference library plus 29 lessons; without a sitemap none of
  * that is discoverable except by crawling the library accordion. TanStack Start's built-in
  * sitemap only covers prerendered pages, and these routes are rendered on demand, so this
  * is a server route that builds the URL set from the same pack the pages render.
  *
  * The bracketed filename (`sitemap[.]xml`) escapes the dot — TanStack Router would
  * otherwise treat "xml" as a child route segment.
+ *
+ * Entries are absolute only when VITE_SITE_URL is set at build time; see meta.ts.
  */
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
@@ -55,7 +57,7 @@ export const Route = createFileRoute("/sitemap.xml")({
 ${urls
   .map(
     (u) =>
-      `  <url><loc>${SITE_URL}${u.loc}</loc><lastmod>${today}</lastmod><changefreq>${u.changefreq}</changefreq><priority>${u.priority}</priority></url>`,
+      `  <url><loc>${absoluteUrl(u.loc)}</loc><lastmod>${today}</lastmod><changefreq>${u.changefreq}</changefreq><priority>${u.priority}</priority></url>`,
   )
   .join("\n")}
 </urlset>

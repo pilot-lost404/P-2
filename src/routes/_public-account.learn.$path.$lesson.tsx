@@ -2,6 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { pageHead } from "@/lib/neet/meta";
 import Breadcrumbs from "@/components/neet/Breadcrumbs";
 import LessonActions, { SaveButton } from "@/components/neet/LessonActions";
+import LabLinks from "@/components/neet/LabLinks";
 import LessonBlocks, { slugify } from "@/components/neet/LessonBlocks";
 import LessonSidebar from "@/components/neet/LessonSidebar";
 import SignatureGate from "@/components/neet/SignatureGate";
@@ -89,6 +90,7 @@ function LessonPage() {
               </li>
             </ul>
           </nav>
+          <LabLinks skillIds={lesson.skillIds} />
           <section className="rounded-lg border border-line bg-surface p-4">
             <p className="font-label text-xs uppercase tracking-widest text-accent">
               Keep this in mind

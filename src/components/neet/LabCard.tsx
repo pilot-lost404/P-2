@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { skillById } from "@/lib/neet/content";
+import Link from "@/components/neet/AppLink";
+import { allLessons, lessonHref, skillById } from "@/lib/neet/content";
 import { actions, useProgress } from "@/lib/neet/store";
 import type { Lab } from "@/lib/neet/types";
 
@@ -24,6 +25,7 @@ export default function LabCard({ lab }: { lab: Lab }) {
       </div>
       <h2 className="mt-3 text-xl font-semibold text-text">{lab.title}</h2>
       <p className="mt-2 text-muted">{lab.brief}</p>
+      <LessonSource skillId={lab.skillId} />
 
       <ol className="mt-4 list-decimal space-y-1 pl-6 marker:font-label marker:text-accent">
         {lab.steps.map((s) => (
@@ -99,5 +101,26 @@ export default function LabCard({ lab }: { lab: Lab }) {
         )}
       </div>
     </article>
+  );
+}
+
+/** The lesson that teaches this lab's skill, so practice never starts cold. */
+function LessonSource({ skillId }: { skillId: string }) {
+  const all = allLessons();
+  const first =
+    all.find((x) => x.lesson.skillIds[0] === skillId) ??
+    all.find((x) => x.lesson.skillIds.includes(skillId));
+  if (!first) return null;
+  return (
+    <p className="mt-3 text-sm text-muted">
+      Read first:{" "}
+      <Link
+        href={lessonHref(first.path.slug, first.lesson.slug)}
+        className="text-text underline underline-offset-4 hover:text-accent"
+      >
+        {first.lesson.title}
+      </Link>{" "}
+      in {first.path.title}
+    </p>
   );
 }

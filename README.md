@@ -3,9 +3,19 @@
 > **NEET** here means _we ain't an academy, we're a group_. It is **not** the medical
 > entrance exam and **not** the "Not in Education, Employment, or Training" policy label.
 
-A learning site: 11 paths / 26 lessons / 10 practice labs across three disciplines, backed
+A learning site: 11 paths / 29 lessons / 10 practice labs across three disciplines, backed
 by a 120-volume reference pack (≈100,000 words, 320 registered sources). Progress is
 evidence-based and decays when unused.
+
+## Where the rest is written down
+
+| File | What it is |
+| --- | --- |
+| `PROJECT_DEEP_DIVE.md` | How the whole system works, and the defects found in it. |
+| `FIXES_APPLIED.md` | Each defect, its fix, and the command that proves it. |
+| `CHANGELOG.md` | What changed and why, newest first. |
+| `TECH_STACK_DEEP_DIVE.md` | Stack decisions, researched limits, and what was rejected. |
+| `AGENTS.md` | Contribution constraints (generated files, secrets, schema changes). |
 
 ## Running it
 
@@ -22,8 +32,8 @@ verified server-side and progress syncs.
 | Command            | What it proves                                                  |
 | ------------------ | --------------------------------------------------------------- |
 | `npx tsc --noEmit` | Types are clean (strict + `exactOptionalPropertyTypes`).        |
-| `npx vitest run`   | 3 files / 18 tests: pack integrity, routing, mastery maths.     |
-| `npx eslint .`     | 0 errors (8 warnings, all pre-existing shadcn `react-refresh`). |
+| `npx vitest run`   | 5 files / 37 tests: pack, routing, mastery maths, citations, curriculum invariants. |
+| `npx eslint .`     | 0 errors (4 warnings, all shadcn `react-refresh`).               |
 | `npx vite build`   | Production build for Cloudflare Workers.                        |
 | `npm run verify`   | All four in one command.                                        |
 | `npm run pack`     | Regenerate the pack tables after editing `content/pack/`.       |
