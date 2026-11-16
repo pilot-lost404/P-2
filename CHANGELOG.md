@@ -21,7 +21,7 @@ prevented either problem from coming back.
   - `the-thin-slice` — how to ship something end to end small enough to survive.
 - **Every skill is now taught before it is assessed.** `sd-scale` was only ever tested
   by `lab-cache` and `en-shipping` only by `lab-ship`; both now have a lesson.
-- 11 paths / 29 lessons / 10 labs / 16 skills, all 16 reachable.
+- 11 paths / 29 lessons / 16 labs / 16 skills, all reachable.
 
 ### Wiring
 
@@ -34,7 +34,7 @@ prevented either problem from coming back.
 
 ### Invariants, enforced
 
-`src/lib/neet/curriculum.test.ts` (14 tests) fails the build if any of these regress:
+`src/lib/neet/curriculum.test.ts` fails the build if any of these regress:
 
 - a lab assesses a skill no lesson teaches, or a skill has no lesson at all;
 - a lesson has no retrieval check, a `pause` has an out-of-range answer, or two pauses
@@ -42,7 +42,13 @@ prevented either problem from coming back.
 - a lesson cites a source id that is not in `content/pack/sources.csv`;
 - a path is a single lesson, two paths or lessons share a slug, or a lesson/path time
   estimate falls outside its sane band;
-- a lab cannot be reached from a lesson or from any path page.
+- a lab cannot be reached from a lesson or from any path page;
+- any skill lacks a lab, or two labs share an id.
+
+`src/lib/neet/scale.test.ts` pins the mastery maths the README used to claim without
+covering: half-life decay, the coverage cap that stops one perfect answer buying mastery,
+the variant/lab requirement for Adapt, the artifact requirement for Proceed, the
+calibration gap, and the step-ordering rules above.
 
 ### Fixed
 
@@ -58,9 +64,27 @@ prevented either problem from coming back.
 - `README.md` and the sitemap route comment said 26 lessons / 18 tests / 8 lint
   warnings; the real numbers are 29 / 37 / 4.
 
+### Progression
+
+- **Six skills had no lab.** `st-stocks`, `st-leverage`, `st-boundaries`, `sd-data`,
+  `sd-reliability` and `en-testing` could reach Know and then stop: the gate said "needs
+  a variant or lab" and there was nothing to open. All 16 skills now have a lab (16 total).
+- **`nextBestStep()` recommended reading over practice.** A skill at Know with no
+  application evidence was skipped in favour of the next unread lesson — the exact
+  read-more-build-nothing loop this project exists to break. Application now outranks
+  breadth, and lab steps deep-link to the specific lab card (`/labs#lab-cache`) instead
+  of dumping the reader into a list of ten.
+- **Added `reviewQueue()`**, which orders skills by how long they have gone without
+  retrieval. The first attempt ordered by points lost, which ranked a 20-day-old skill
+  above a 90-day-old one because a stale skill has already shed most of what it will
+  lose; ordering by elapsed time is what spaced-repetition schedulers do.
+- The dashboard gained a "Due for retrieval" card and the heatmap now leads with **days
+  active this year** rather than a streak counter — a broken streak punishes absence
+  instead of encouraging return.
+
 ### Verified
 
-`npm run verify` → `tsc` 0 errors · 5 files / 37 tests · eslint 0 errors (4 shadcn
+`npm run verify` → `tsc` 0 errors · 6 files / 50 tests · eslint 0 errors (4 shadcn
 `react-refresh` warnings) · production build ok. Crawl of all 170 sitemap URLs plus
 every `/learn/*` link: all 200. Unknown paths return 404.
 

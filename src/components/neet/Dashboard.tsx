@@ -1,7 +1,13 @@
 import Link from "@/components/neet/AppLink";
 import { DISCIPLINES, PATHS, STAGES, SKILLS } from "@/lib/neet/content";
 import { pathProgress } from "@/lib/neet/derive";
-import { calibration, computeAll, disciplineScores, nextBestStep } from "@/lib/neet/scale";
+import {
+  calibration,
+  computeAll,
+  disciplineScores,
+  nextBestStep,
+  reviewQueue,
+} from "@/lib/neet/scale";
 import { actions, useHydrated, useProgress } from "@/lib/neet/store";
 import { useMe } from "@/hooks/use-me";
 import ProgressBar from "./ProgressBar";
@@ -34,6 +40,7 @@ export default function Dashboard() {
   const scores = disciplineScores(progress);
   const next = nextBestStep(progress, completed);
   const cal = calibration(evidence);
+  const due = reviewQueue(progress).slice(0, 3);
   const empty = evidence.length === 0 && completed.length === 0;
 
   return (
@@ -98,6 +105,36 @@ export default function Dashboard() {
               →
             </Link>
           </section>
+
+          {due.length > 0 && (
+            <section aria-labelledby="due-h" className="rounded-3xl bg-surface p-6">
+              <h2 id="due-h" className="font-label text-sm uppercase tracking-widest text-accent">
+                Due for retrieval
+              </h2>
+              <p className="mt-2 text-sm text-muted">
+                Mastery decays whether or not you come back. These are the skills losing the most
+                ground.
+              </p>
+              <ul className="mt-3 space-y-2">
+                {due.map((d) => (
+                  <li key={d.skillId} className="flex items-baseline justify-between gap-3 text-sm">
+                    <span className="text-text">
+                      {SKILLS.find((s) => s.id === d.skillId)?.title}
+                    </span>
+                    <span className="shrink-0 font-label text-xs text-muted">
+                      {d.days}d ago · {Math.round(d.retained * 100)}% retained
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/paths"
+                className="mt-3 inline-block text-sm text-accent underline underline-offset-4"
+              >
+                Re-read one, then answer its check
+              </Link>
+            </section>
+          )}
 
           <section aria-labelledby="cal-h" className="rounded-3xl bg-surface p-6">
             <h2 id="cal-h" className="font-label text-sm uppercase tracking-widest text-accent">

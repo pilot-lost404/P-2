@@ -98,6 +98,34 @@ export interface NextStep {
   title: string;
   href: string;
   reason: string;
+  /** Which skill this step serves, so the UI can show the gate or the decay. */
+  skillId?: string | undefined;
+}
+
+/** Deep link to a specific lab card; `/labs` alone loses the reader in a list of ten. */
+const labHref = (labId: string) => `/labs#${labId}`;
+
+/**
+ * Skills that are overdue for retrieval, most overdue first.
+ *
+ * Ordering is by elapsed time, not by points lost: `lost` is measured from *now*, so a
+ * skill whose evidence is 90 days old has already shed most of what it was going to
+ * lose and scores lower than one touched 20 days ago. That inverts the question the
+ * learner is asking ("what will I forget next?"). Sorting by days-since-evidence is what
+ * spaced-repetition schedulers do — due date first, retention as the tie-break — and it
+ * does not punish someone for having missed a long stretch.
+ *
+ * `retained` is the surviving fraction of mastery (1 = untouched, 0 = all decayed).
+ */
+export function reviewQueue(progress: SkillProgress[], now = Date.now()) {
+  return progress
+    .filter((p) => p.level >= 1 && p.lastEvidenceAt)
+    .map((p) => {
+      const days = (now - Date.parse(p.lastEvidenceAt!)) / DAY;
+      const retained = decay(days);
+      return { ...p, days: Math.round(days), retained, lost: p.mastery * (1 - retained) };
+    })
+    .sort((a, b) => b.days - a.days || a.retained - b.retained);
 }
 
 export function nextBestStep(
@@ -123,10 +151,31 @@ export function nextBestStep(
         href: lessonHref(l.path.slug, l.lesson.slug),
         reason:
           "Mastery decays without retrieval. This one has not been touched in over two weeks.",
+        skillId: stale.skillId,
       };
   }
 
-  // 2. Lowest level among skills whose prerequisites are reached.
+  // 2. Finish what is already known but not yet applied.
+  //
+  // A skill at Know (level 2) with no variant or lab evidence is unfinished work: the
+  // learner read it, and the only thing standing between them and Adapt is doing it.
+  // Recommending another lesson first is exactly the "read more, build nothing" loop
+  // this project exists to break, so application outranks breadth here.
+  const unapplied = progress.filter((p) => p.level === 2).sort((a, b) => b.mastery - a.mastery);
+  for (const p of unapplied) {
+    const lab = LABS.find((l) => l.skillId === p.skillId);
+    if (!lab) continue;
+    const skill = SKILLS.find((s) => s.id === p.skillId)!;
+    return {
+      kind: "lab",
+      title: lab.title,
+      href: labHref(lab.id),
+      reason: `You know ${skill.title}. One lab moves it from Know to Adapt.`,
+      skillId: skill.id,
+    };
+  }
+
+  // 3. Lowest level among skills whose prerequisites are reached.
   const open = SKILLS.filter((s) =>
     s.prerequisites.every((p) => (byId.get(p)?.level ?? 0) >= 1),
   ).sort((a, b) => (byId.get(a.id)?.level ?? 0) - (byId.get(b.id)?.level ?? 0));
@@ -143,14 +192,16 @@ export function nextBestStep(
         title: lesson.lesson.title,
         href: lessonHref(lesson.path.slug, lesson.lesson.slug),
         reason: `Builds ${skill.title}, the lowest skill you can reach right now.`,
+        skillId: skill.id,
       };
     const lab = LABS.find((l) => l.skillId === skill.id);
     if (lvl >= 2 && lvl < 4 && lab)
       return {
         kind: "lab",
         title: lab.title,
-        href: "/labs",
+        href: labHref(lab.id),
         reason: `You know ${skill.title}. A lab shows you can adapt it.`,
+        skillId: skill.id,
       };
     if (lesson)
       return {
@@ -158,6 +209,7 @@ export function nextBestStep(
         title: lesson.lesson.title,
         href: lessonHref(lesson.path.slug, lesson.lesson.slug),
         reason: `Next in ${skill.title}.`,
+        skillId: skill.id,
       };
   }
   const first = PATHS[0];
@@ -166,5 +218,6 @@ export function nextBestStep(
     title: first!.modules[0]!.lessons[0]!.title,
     href: lessonHref(first!.slug, first!.modules[0]!.lessons[0]!.slug),
     reason: "Start at the beginning.",
+    skillId: first!.modules[0]!.lessons[0]!.skillIds[0],
   };
 }

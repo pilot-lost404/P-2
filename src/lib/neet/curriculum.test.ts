@@ -117,10 +117,15 @@ describe("curriculum completeness", () => {
     expect(LABS.filter((l) => !reachable.has(l.id)).map((l) => l.id)).toEqual([]);
   });
 
-  it("has a lab for every Adapt-stage skill", () => {
+  it("has a lab for every skill", () => {
+    // Skills reachable without a lab can never pass the Adapt gate, so their
+    // "needs a lab" message points nowhere. This was true of six skills.
     const labSkills = new Set(LABS.map((l) => l.skillId));
-    // Skills reachable without a lab can never pass the Adapt gate.
-    const design = SKILLS.filter((s) => ["sd-scale", "en-shipping", "st-loops"].includes(s.id));
-    for (const s of design) expect(labSkills.has(s.id), `${s.id} needs a lab`).toBe(true);
+    expect(SKILLS.filter((s) => !labSkills.has(s.id)).map((s) => s.id)).toEqual([]);
+  });
+
+  it("gives each lab exactly one skill and a distinct id", () => {
+    expect(new Set(LABS.map((l) => l.id)).size).toBe(LABS.length);
+    for (const lab of LABS) expect(SKILLS.some((s) => s.id === lab.skillId)).toBe(true);
   });
 });

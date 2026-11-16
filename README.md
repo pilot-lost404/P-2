@@ -3,7 +3,7 @@
 > **NEET** here means _we ain't an academy, we're a group_. It is **not** the medical
 > entrance exam and **not** the "Not in Education, Employment, or Training" policy label.
 
-A learning site: 11 paths / 29 lessons / 10 practice labs across three disciplines, backed
+A learning site: 11 paths / 29 lessons / 16 practice labs across three disciplines, backed
 by a 120-volume reference pack (≈100,000 words, 320 registered sources). Progress is
 evidence-based and decays when unused.
 
@@ -32,7 +32,7 @@ verified server-side and progress syncs.
 | Command            | What it proves                                                                      |
 | ------------------ | ----------------------------------------------------------------------------------- |
 | `npx tsc --noEmit` | Types are clean (strict + `exactOptionalPropertyTypes`).                            |
-| `npx vitest run`   | 5 files / 37 tests: pack, routing, mastery maths, citations, curriculum invariants. |
+| `npx vitest run`   | 6 files / 50 tests: pack, routing, mastery maths, citations, curriculum invariants. |
 | `npx eslint .`     | 0 errors (4 warnings, all shadcn `react-refresh`).                                  |
 | `npx vite build`   | Production build for Cloudflare Workers.                                            |
 | `npm run verify`   | All four in one command.                                                            |

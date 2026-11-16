@@ -1754,8 +1754,129 @@ export const LABS: Lab[] = [
     ],
     twist:
       "A common-cause failure (e.g. rack power outage) trips both nodes simultaneously with rate gamma. How does availability change?",
+
     artifact:
       "A Python/Jupyter script or detailed mathematical derivation calculating availability under nominal and common-cause scenarios.",
+  },
+  {
+    id: "lab-stock-flow",
+    title: "Build a stock-and-flow model that surprises you",
+    skillId: "st-stocks",
+    evidenceType: "lab",
+    minutes: 50,
+    brief:
+      "Pick a quantity you can actually observe over time — inbox depth, open pull requests, cash on hand — and model it as one stock with an inflow and an outflow.",
+    steps: [
+      "Name the stock and its unit. A stock is something that accumulates; if you cannot say what accumulates, pick again.",
+      "Write the inflow and the outflow as rates per week, with the numbers you actually observe.",
+      "Sketch behaviour over 12 weeks by hand, before running anything.",
+      "Simulate it (spreadsheet or any tool) and compare against your sketch.",
+      "Find one place where your hand sketch and the simulation disagree, and say why.",
+    ],
+    twist:
+      "Add a delay of three weeks to the outflow. Behaviour that looked stable now oscillates — explain what the delay did, not just that it changed.",
+    artifact:
+      "A one-page model (equations or screenshot), your hand sketch, and a paragraph on what you got wrong.",
+  },
+  {
+    id: "lab-leverage",
+    title: "Rank twelve interventions, then predict the response",
+    skillId: "st-leverage",
+    evidenceType: "lab",
+    minutes: 45,
+    brief:
+      "Take a real system you are inside — a team process, a course, a product funnel — and list twelve interventions you could make.",
+    steps: [
+      "Write twelve interventions, from tweaking a parameter to changing the goal of the system.",
+      "Place each on Meadows' hierarchy (parameters → buffers → delays → feedback strength → information flows → rules → goals → paradigm).",
+      "Predict which two produce the largest behaviour change, and why.",
+      "Pick the highest-leverage one you can actually try this week.",
+      "Try it, and record what the system did in response.",
+    ],
+    twist:
+      "Two interventions produce no measurable change at all. Decide whether you were wrong about the leverage, or wrong about the measurement window.",
+    artifact:
+      "The ranked list with positions on the hierarchy, your prediction, and what actually happened.",
+  },
+  {
+    id: "lab-boundaries",
+    title: "Redraw the boundary and watch the problem change",
+    skillId: "st-boundaries",
+    evidenceType: "variant",
+    minutes: 40,
+    brief:
+      "Choose a problem that has resisted a fix. Draw the system boundary that the last attempt assumed — then draw a wider one.",
+    steps: [
+      "Write the problem as it is usually stated, and name who is inside the boundary and who is outside.",
+      "List the stakeholders who are outside the boundary but affected by it.",
+      "Redraw the boundary to include two of them.",
+      "Name which goals or constraints were invisible from the original boundary.",
+      "State the problem again in one sentence from the wider view.",
+    ],
+    twist:
+      "The wider boundary makes the problem unsolvable within your authority. What does that tell you about the original framing?",
+    artifact:
+      "Both diagrams with a stakeholder list, and the two versions of the problem statement side by side.",
+  },
+  {
+    id: "lab-storage",
+    title: "Choose a storage engine and defend the failure mode",
+    skillId: "sd-data",
+    evidenceType: "variant",
+    minutes: 55,
+    brief:
+      "Given one workload, choose between a relational store, a wide-column store, a document store and a log-structured store — and state what you give up.",
+    steps: [
+      "Write the access pattern: read/write ratio, query shape, consistency needed per operation.",
+      "Estimate read and write volume per second at peak, with your arithmetic shown.",
+      "Pick a paradigm and name the consistency guarantee you are relying on.",
+      "Name the failure mode your choice makes more likely.",
+      "Describe the migration path if the estimate was wrong by 10x.",
+    ],
+    twist:
+      "Product adds a requirement for cross-entity transactions. Does your choice survive, and at what cost?",
+    artifact:
+      "A one-page decision record: workload, choice, guarantee relied on, failure mode accepted, migration trigger.",
+  },
+  {
+    id: "lab-reliability",
+    title: "Design for reliability, then break it",
+    skillId: "sd-reliability",
+    evidenceType: "lab",
+    minutes: 60,
+    brief:
+      "Take a service you know and write down what 'reliable' means for it, then find the single dependency whose failure breaks that definition.",
+    steps: [
+      "State availability and latency targets as measurable objectives with a window.",
+      "List the runtime dependencies — data store, identity, queue, third party API.",
+      "For each, write what the user sees if it fails or slows.",
+      "Add one defence per dependency: timeout, retry with jitter, circuit breaker, or graceful degradation.",
+      "Pick the weakest link and describe the defence you would build first.",
+    ],
+    twist:
+      "Retries make an outage worse because every retry amplifies load on the already-failing dependency. Explain how you would have caught that before shipping.",
+    artifact:
+      "An objectives table, a dependency failure matrix, and the defence you would build first with the reasoning.",
+  },
+  {
+    id: "lab-tests",
+    title: "Write the test that would have caught it",
+    skillId: "en-testing",
+    evidenceType: "lab",
+    minutes: 50,
+    brief:
+      "Find a real bug — from your own code, a public issue tracker, or a postmortem — and write the failing test that pins it.",
+    steps: [
+      "Describe the bug in one sentence, including the conditions that trigger it.",
+      "Write a test that fails on the buggy code. Run it and paste the failure.",
+      "Classify the bug: missing requirement, wrong assumption, boundary condition, or integration mismatch.",
+      "Fix it, and show the same test passing.",
+      "Decide what class of test this belongs to (unit, property, integration, or acceptance) and why a test of that class was missing.",
+    ],
+    twist:
+      "The fix is easy but the same class of bug could recur elsewhere. Write one additional test that would catch the class, not the instance.",
+    artifact:
+      "The failing test, the failure output, the passing run after the fix, and the class-level test.",
   },
 ];
 

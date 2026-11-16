@@ -23,7 +23,10 @@ export default function ProgressHeatmap({
   weeks?: number;
   compact?: boolean;
 }) {
-  const { grid, s, total, perDisc } = useMemo(() => {
+  // Days active leads, not the streak: a broken streak is demotivating and gamified
+  // counters reward showing up for the counter rather than for the work. The streak
+  // is still shown, second, as what it actually is — a current run.
+  const { grid, s, total, perDisc, activeDays } = useMemo(() => {
     const counts = bucketByDay(events.map((e) => e.occurred_on));
     const today = new Date();
     const perDisc = { st: 0, sd: 0, en: 0 } as Record<DisciplineCode, number>;
@@ -35,6 +38,7 @@ export default function ProgressHeatmap({
       s: streaks(counts, today),
       total: events.length,
       perDisc,
+      activeDays: counts.size,
     };
   }, [events, weeks]);
 
@@ -49,19 +53,19 @@ export default function ProgressHeatmap({
             <span className="text-muted">activities in the last year</span>
           </span>
           <span>
-            <strong className="text-text">{s.current}</strong>{" "}
-            <span className="text-muted">day streak</span>
+            <strong className="text-text">{activeDays}</strong>{" "}
+            <span className="text-muted">days active this year</span>
           </span>
           <span>
-            <strong className="text-text">{s.longest}</strong>{" "}
-            <span className="text-muted">longest</span>
+            <strong className="text-text">{s.current}</strong>{" "}
+            <span className="text-muted">day{s.current === 1 ? "" : "s"} in a row</span>
           </span>
         </div>
       )}
       <div
         className="overflow-x-auto pb-1"
         role="img"
-        aria-label={`Daily progress: ${total} activities, ${s.current} day current streak`}
+        aria-label={`Daily activity: ${total} activities on ${activeDays} days`}
       >
         <div className="inline-flex flex-col gap-1">
           {!compact && (
