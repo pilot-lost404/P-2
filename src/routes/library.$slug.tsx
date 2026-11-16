@@ -5,7 +5,7 @@ import { recordArticleRead } from "@/lib/neet/account.functions";
 import Link from "@/components/neet/AppLink";
 import Breadcrumbs from "@/components/neet/Breadcrumbs";
 import Markdown from "@/components/neet/Markdown";
-import { slugify } from "@/components/neet/LessonBlocks";
+import { slugify } from "@/lib/neet/slug";
 import { LoadError } from "@/components/neet/ui";
 import { getArticle } from "@/lib/neet/library.functions";
 import { absoluteUrl, pageHead } from "@/lib/neet/meta";

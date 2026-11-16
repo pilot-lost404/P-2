@@ -1,12 +1,7 @@
+import { slugify } from "@/lib/neet/slug";
 import type { Block } from "@/lib/neet/types";
 import Callout from "./Callout";
 import PauseAndThink from "./PauseAndThink";
-
-export const slugify = (s: string) =>
-  s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
 
 export default function LessonBlocks({ blocks }: { blocks: Block[] }) {
   return (

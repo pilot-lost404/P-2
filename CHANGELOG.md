@@ -82,9 +82,23 @@ calibration gap, and the step-ordering rules above.
   active this year** rather than a streak counter — a broken streak punishes absence
   instead of encouraging return.
 
+### Lint is now silent
+
+`npx eslint .` used to print four `react-refresh/only-export-components` warnings: three
+components exported a constant alongside a component (`buttonVariants`, `toggleVariants`,
+`slugify`), and `AppLink` exported `splitHref`. Those helpers moved to their own modules
+(`slug.ts`, `href.ts`, `button-variants.ts`, `toggle-variants.ts`) and the barrel exports
+that re-exported `buttonVariants`/`toggleVariants` were dropped — nothing imported them from
+there. Warnings are worth zeroing rather than explaining away, because a warning list that
+is always non-empty stops being read.
+
+`AGENTS.md` described a layout that no longer exists (`_authenticated`, a Supabase-backed
+pack read, `SS_content/` re-imports); it now matches the code. `PROJECT_DEEP_DIVE.md` is
+marked as a dated snapshot so its pre-fix figures are not mistaken for current state.
+
 ### Verified
 
-`npm run verify` → `tsc` 0 errors · 6 files / 50 tests · eslint 0 errors (4 shadcn
+`npm run verify` → `tsc` 0 errors · 0 eslint warnings · 6 files / 50 tests · eslint 0 errors (4 shadcn
 `react-refresh` warnings) · production build ok. Crawl of all 170 sitemap URLs plus
 every `/learn/*` link: all 200. Unknown paths return 404.
 

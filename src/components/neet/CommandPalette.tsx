@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { splitHref } from "./AppLink";
+import { splitHref } from "@/lib/neet/href";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LABS, PATHS, allLessons, lessonHref } from "@/lib/neet/content";
 

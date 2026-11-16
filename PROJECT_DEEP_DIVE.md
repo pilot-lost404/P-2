@@ -7,6 +7,15 @@
 >
 > Everything in Part 1 was verified by reading the code and running it, not inferred from
 > `README.md`. Where I ran a command, the evidence is quoted.
+>
+> **This is a dated snapshot, not living documentation.** It describes the repository as it
+> was on 2026-11-05, before any of Part 3 was implemented. Several figures in it no longer
+> match the code: 26 lessons (now 29), 10 labs (now 16), a `node:sqlite` `db.server.ts`
+> (deleted), `SS_content/` as a byte-identical mirror (deleted), the `_authenticated` route
+> (now the pathless `_public-account`), 8 eslint warnings (now 0), and "Export Verified
+> Portfolio" (now "Export portfolio (JSON)"). Part 3 is kept as the record of what was
+> proposed; `FIXES_APPLIED.md` and `CHANGELOG.md` record what was done and the current
+> numbers.
 
 ---
 

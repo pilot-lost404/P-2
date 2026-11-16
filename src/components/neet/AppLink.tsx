@@ -1,12 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ComponentProps } from "react";
-
-export function splitHref(href: string) {
-  const [path = "", hash] = href.split("#");
-  const [to, qs] = path.split("?");
-  const search = qs ? Object.fromEntries(new URLSearchParams(qs)) : undefined;
-  return { to: to || "/", hash: hash || undefined, search };
-}
+import { splitHref } from "@/lib/neet/href";
 
 type Props = Omit<ComponentProps<"a">, "href"> & { href: string };
 

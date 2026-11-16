@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "./AppLink";
-import { slugify } from "./LessonBlocks";
+import { slugify } from "@/lib/neet/slug";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CITATION_ALIASES } from "@/lib/neet/citation-aliases";
 import type { ArticleCitation } from "@/lib/neet/library.functions";
