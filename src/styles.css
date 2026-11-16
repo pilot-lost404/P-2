@@ -75,8 +75,13 @@
   --accent-dim: oklch(0.82 0.08 255);
   /* Tinted accent surface for callouts and active states. */
   --accent-tint: oklch(0.962 0.02 255);
-  --ok: oklch(0.65 0.17 150);
-  --warn: oklch(0.7 0.17 55);
+  /* Both were too light to be read as text: at 0.65 and 0.7 they measured 3.01:1 and
+     2.82:1 on --bg, and worse on --surface-2 / --sage. They are used for real words
+     ("Submitted", "Not quite", the Callout heading), not just for decorative borders,
+     so they have to clear AA. These values are the lightest that clear 4.5:1 on every
+     surface we put them on (--bg, --surface, --surface-2, --sage, --accent-tint). */
+  --ok: oklch(0.5 0.17 150); /* 5.39 bg · 5.02 surface · 4.59 surface-2 · 4.58 sage */
+  --warn: oklch(0.54 0.17 55); /* 5.34 bg · 4.97 surface · 4.54 surface-2 · 4.54 sage */
   --sage: oklch(0.94 0.04 150);
   --ink: oklch(0.18 0.005 260);
   --gradient-warm: radial-gradient(

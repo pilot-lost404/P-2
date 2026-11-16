@@ -4,6 +4,7 @@ import Link from "@/components/neet/AppLink";
 import { Chip, Empty, LoadError, PageHeader, SearchField } from "@/components/neet/ui";
 import { listArticles, searchArticles } from "@/lib/neet/library.functions";
 import { pageHead } from "@/lib/neet/meta";
+import { slugify } from "@/lib/neet/slug";
 
 type Search = { q?: string | undefined; track?: string | undefined };
 
@@ -166,29 +167,41 @@ function Library() {
           const mins = items.reduce((n, a) => n + Math.max(1, Math.round(a.word_count / 220)), 0);
           return (
             <section key={t} className="border-b border-line">
-              <button
-                type="button"
-                aria-expanded={isOpen}
-                onClick={() => toggle(t)}
-                className="group grid w-full grid-cols-[2.75rem_1fr_auto] items-center gap-3 py-5 text-left sm:grid-cols-[4rem_1fr_auto_auto] sm:gap-6"
-              >
-                <span className="text-sm tabular-nums text-muted">{ROMAN[idx] ?? idx}.</span>
-                <span className="text-lg font-semibold tracking-tight text-text transition group-hover:text-accent sm:text-xl">
-                  {t}
-                </span>
-                <span className="hidden text-sm text-muted sm:inline">
-                  {items.length} {items.length === 1 ? "volume" : "volumes"} · ~
-                  {mins < 60 ? `${mins} min` : `${Math.round(mins / 60)}h`}
-                </span>
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-full bg-surface text-muted transition ${isOpen ? "rotate-45 bg-text text-bg" : ""}`}
-                  aria-hidden
+              {/* The heading wraps the toggle (the standard accordion pattern) so the
+                  twelve tracks appear in the document outline. Without it this page had a
+                  single h1 heading 120 volumes, and a screen-reader user navigating by
+                  heading had nowhere to jump. */}
+              <h2 className="text-base font-normal">
+                <button
+                  type="button"
+                  id={`track-btn-${slugify(t)}`}
+                  aria-expanded={isOpen}
+                  aria-controls={`track-panel-${slugify(t)}`}
+                  onClick={() => toggle(t)}
+                  className="group grid w-full grid-cols-[2.75rem_1fr_auto] items-center gap-3 py-5 text-left sm:grid-cols-[4rem_1fr_auto_auto] sm:gap-6"
                 >
-                  +
-                </span>
-              </button>
+                  <span className="text-sm tabular-nums text-muted">{ROMAN[idx] ?? idx}.</span>
+                  <span className="text-lg font-semibold tracking-tight text-text transition group-hover:text-accent sm:text-xl">
+                    {t}
+                  </span>
+                  <span className="hidden text-sm text-muted sm:inline">
+                    {items.length} {items.length === 1 ? "volume" : "volumes"} · ~
+                    {mins < 60 ? `${mins} min` : `${Math.round(mins / 60)}h`}
+                  </span>
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-full bg-surface text-muted transition ${isOpen ? "rotate-45 bg-text text-bg" : ""}`}
+                    aria-hidden
+                  >
+                    +
+                  </span>
+                </button>
+              </h2>
               {isOpen && (
-                <ol className="pb-5 sm:pl-[5.5rem]">
+                <ol
+                  id={`track-panel-${slugify(t)}`}
+                  aria-labelledby={`track-btn-${slugify(t)}`}
+                  className="pb-5 sm:pl-[5.5rem]"
+                >
                   {items.map((a) => (
                     <li key={a.slug}>
                       <Link
