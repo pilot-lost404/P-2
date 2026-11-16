@@ -101,7 +101,7 @@ export const SCALING_LESSONS: Lesson[] = [
       {
         t: "callout",
         title: "Read more",
-        text: "Google SRE Book [S15] for load and overload behaviour, Google Cloud Well-Architected [S10] for performance and reliability trade-offs, and ZooKeeper [S196] for what coordination looks like when you cannot assume a shared cache.",
+        text: "Google SRE Book [S15] for load and overload behaviour, and Google Cloud's reliability pillar [S20] for how a performance layer becomes a reliability dependency.",
       },
     ],
   },
