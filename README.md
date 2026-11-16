@@ -91,6 +91,17 @@ of markdown into the browser bundle.
   (the bracketed filename escapes the dot for TanStack Router). Decorative scaffold
   components were removed down to the 11 actually used, which dropped 28 runtime
   dependencies.
+- **Security headers** — applied once in `src/server.ts` from
+  `src/lib/security-headers.ts`, so pages, error pages, redirects and 404s all carry them.
+  This is deployment-specific: the Worker serves HTML through SSR, so `public/_headers`
+  only reaches `/assets/*` and request middleware in `src/start.ts` does not run for
+  documents. CSP allows inline script (TanStack's hydration bootstrap, and this framework
+  version has no nonce support) but forbids `unsafe-eval`, locks `object-src`, `base-uri`
+  and `form-action`, and scopes framing to our own preview surfaces. Personal pages send
+  `private, no-store`.
+- **Canonicals** — every rendered page emits a self-referencing `rel=canonical` built from
+  the router's own `match.pathname`, so it cannot drift when a route moves. Unmatched URLs
+  respond 404 with a `noindex` "Page not found" head instead of inheriting the homepage's.
 
 ## Design system
 

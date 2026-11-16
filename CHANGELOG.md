@@ -1,7 +1,73 @@
 # Changelog
 
-Dated by intent, not by release. This project has no version tags yet; the three
-commits below are the whole history.
+Dated by intent, not by release. This project has no version tags yet; the
+sections below are the whole history, newest first.
+
+## Unreleased — security headers, canonicals, and two contrast failures
+
+Started from a research pass over practitioner sources (Reddit's r/webdev and
+r/CloudFlare, plus the usual header/CSP write-ups) and then measured this
+deployment rather than assuming. The first discovery was that the app shipped
+**no security headers at all**.
+
+### Security
+
+- **Headers were wired but never ran.** `securityHeadersMiddleware` in
+  `src/start.ts` was compiled into the bundle, and `curl -D` against the built
+  Worker returned a bare `Content-Type`. The deployment is Worker + static
+  assets, so documents are SSR: `public/_headers` reaches only `/assets/*`, and
+  request middleware does not run for document responses. The contract now lives
+  in `src/lib/security-headers.ts` and is applied in `src/server.ts`, which sees
+  every response — pages, errors, redirects and 404s. The old middleware is
+  removed with a comment explaining why header logic does not belong there (it
+  also set `X-Frame-Options: SAMEORIGIN`, contradicting the frame allowlist that
+  keeps the editor preview from going blank).
+- CSP: `default-src 'self'`, inline script allowed and `unsafe-eval` forbidden
+  (tests enforce both), `object-src 'none'`, `base-uri 'self'`,
+  `form-action 'self'`, framing scoped to our own preview surfaces, HSTS,
+  nosniff, referrer policy, a locked Permissions-Policy, and COOP.
+- **Personal pages were cacheable by anyone.** `/me`, `/me/calibration`, `/auth`
+  and `/reset-password` sent no `Cache-Control`; they now send
+  `private, no-store`. Public HTML revalidates. The match is on path segments, so
+  `/method` is not mistaken for `/me` — there is a test for that.
+
+### Discoverability
+
+- **Every page now emits a self-referencing canonical.** None did before, and the
+  home page and `/paths` had none because their heads are hand-written. The URL
+  comes from the router's `match.pathname`, so it cannot drift, and is normalised
+  (trailing slash, repeats, letter case) — `/Me` and `/PATHS` both render, and
+  now both point at the lowercase URL.
+- **404s no longer pretend to be the homepage.** An unmatched URL returned 404
+  with the root head attached: homepage title, homepage description, indexable.
+  The root head now detects the not-found and emits `Page not found · NEET` plus
+  `noindex`. The router marks a root-boundary miss with `status: "success"` and an
+  internal `_notFound` flag rather than `status: "notFound"`, which is why the
+  first attempt changed nothing.
+
+### Accessibility
+
+- **Two colour tokens failed AA and were used for real words.** Measured in
+  OKLCH→sRGB: `--ok` was 3.01:1 on `--bg` and `--warn` 2.82:1, worse on
+  `--surface-2`. They colour "Submitted", "Not quite", the Callout heading and the
+  pause-and-think verdict. Both are now the lightest values clearing 4.5:1 on
+  every surface they appear on, with the ratios recorded beside the tokens.
+  (`--muted-foreground` and `--accent` were already checked and are unchanged;
+  the ink panels measure 18.8:1.)
+- **The library page had one heading for 120 volumes.** The twelve track toggles
+  were buttons in bare `<section>`s, so navigating by heading gave nothing and the
+  panels were not associated with their buttons. Each track is now an `h2`
+  wrapping its toggle with `aria-controls`/`aria-labelledby`.
+- **The skip link did not work.** It scrolled to `<main>` but left focus on the
+  link, so the next Tab went back to the nav. `<main>` is now `tabIndex={-1}`.
+- **The command palette had no focus trap** and never returned focus to whatever
+  opened it. Both added, along with a proper combobox/`aria-activedescendant`
+  relationship to the result list.
+- **Form errors were not tied to their fields.** Auth and reset-password now use
+  `aria-invalid` + `aria-describedby`, move focus to the offending field on a
+  failed submit, and keep password managers able to autofill. The signature gate
+  and goal inputs gained real labels, and search gained an `aria-label` instead of
+  relying on a placeholder that disappears on typing.
 
 ## Unreleased — completing the course layer
 
