@@ -4,8 +4,6 @@
 // 120 markdown volumes and 6 CSV registries, imported as raw strings so
 // the content layer works on any runtime (no node:fs, no node:sqlite).
 
-/* eslint-disable */
-
 import md0 from "../../../content/pack/00_START_HERE.md?raw"; // 00_START_HERE
 import md1 from "../../../content/pack/01_DEFINITIONS_AND_MENTAL_MODELS.md?raw"; // 01_DEFINITIONS_AND_MENTAL_MODELS
 import md2 from "../../../content/pack/02_SYSTEMS_THINKING.md?raw"; // 02_SYSTEMS_THINKING

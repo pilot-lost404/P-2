@@ -41,8 +41,6 @@ lines.push(
 );
 lines.push("// the content layer works on any runtime (no node:fs, no node:sqlite).");
 lines.push("");
-lines.push("/* eslint-disable */");
-lines.push("");
 
 md.forEach((f, i) => {
   lines.push(`import md${i} from "../../../content/pack/${f}?raw"; // ${ident(f)}`);

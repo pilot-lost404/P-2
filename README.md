@@ -9,18 +9,18 @@ evidence-based and decays when unused.
 
 ## Where the rest is written down
 
-| File | What it is |
-| --- | --- |
-| `PROJECT_DEEP_DIVE.md` | How the whole system works, and the defects found in it. |
-| `FIXES_APPLIED.md` | Each defect, its fix, and the command that proves it. |
-| `CHANGELOG.md` | What changed and why, newest first. |
-| `TECH_STACK_DEEP_DIVE.md` | Stack decisions, researched limits, and what was rejected. |
-| `AGENTS.md` | Contribution constraints (generated files, secrets, schema changes). |
+| File                      | What it is                                                           |
+| ------------------------- | -------------------------------------------------------------------- |
+| `PROJECT_DEEP_DIVE.md`    | How the whole system works, and the defects found in it.             |
+| `FIXES_APPLIED.md`        | Each defect, its fix, and the command that proves it.                |
+| `CHANGELOG.md`            | What changed and why, newest first.                                  |
+| `TECH_STACK_DEEP_DIVE.md` | Stack decisions, researched limits, and what was rejected.           |
+| `AGENTS.md`               | Contribution constraints (generated files, secrets, schema changes). |
 
 ## Running it
 
 ```sh
-npm i
+npm ci             # or `npm i`; package-lock.json is the only lockfile
 npm run dev        # http://localhost:8080
 ```
 
@@ -29,14 +29,24 @@ runs in **local mode**: progress lives in this browser and in an in-memory serve
 `/auth` explains that accounts aren't configured. With credentials present, sessions are
 verified server-side and progress syncs.
 
-| Command            | What it proves                                                  |
-| ------------------ | --------------------------------------------------------------- |
-| `npx tsc --noEmit` | Types are clean (strict + `exactOptionalPropertyTypes`).        |
+| Command            | What it proves                                                                      |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| `npx tsc --noEmit` | Types are clean (strict + `exactOptionalPropertyTypes`).                            |
 | `npx vitest run`   | 5 files / 37 tests: pack, routing, mastery maths, citations, curriculum invariants. |
-| `npx eslint .`     | 0 errors (4 warnings, all shadcn `react-refresh`).               |
-| `npx vite build`   | Production build for Cloudflare Workers.                        |
-| `npm run verify`   | All four in one command.                                        |
-| `npm run pack`     | Regenerate the pack tables after editing `content/pack/`.       |
+| `npx eslint .`     | 0 errors (4 warnings, all shadcn `react-refresh`).                                  |
+| `npx vite build`   | Production build for Cloudflare Workers.                                            |
+| `npm run verify`   | All four in one command.                                                            |
+| `npm run pack`     | Regenerate the pack tables after editing `content/pack/`.                           |
+
+Two generated files must be regenerated, never hand-edited:
+
+| After editing…           | Run                                          | Writes                                                            |
+| ------------------------ | -------------------------------------------- | ----------------------------------------------------------------- |
+| `content/pack/*`         | `npm run pack`                               | `src/lib/neet/pack-data.generated.ts`, `pack-counts.generated.ts` |
+| (rarely) source metadata | `node scripts/generate_source_enrichment.js` | `src/lib/neet/sourceEnrichment.ts`                                |
+
+Set `VITE_SITE_URL` to your deployed origin at build time so canonical links and
+`/sitemap.xml` carry real absolute URLs; unset, they stay relative. See `.env.example`.
 
 ## How content works
 
