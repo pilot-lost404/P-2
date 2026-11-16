@@ -3,6 +3,7 @@ import { pageHead } from "@/lib/neet/meta";
 import Breadcrumbs from "@/components/neet/Breadcrumbs";
 import LessonActions, { SaveButton } from "@/components/neet/LessonActions";
 import LabLinks from "@/components/neet/LabLinks";
+import SkillGate from "@/components/neet/SkillGate";
 import LessonBlocks, { slugify } from "@/components/neet/LessonBlocks";
 import LessonSidebar from "@/components/neet/LessonSidebar";
 import SignatureGate from "@/components/neet/SignatureGate";
@@ -45,8 +46,9 @@ function LessonPage() {
           </p>
           <h1 className="mt-2 max-w-3xl text-4xl font-semibold md:text-5xl">{lesson.title}</h1>
           <p className="measure mt-4 text-xl leading-8 text-muted">{lesson.summary}</p>
-          <div className="mt-5">
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             <SaveButton pathSlug={path.slug} lessonSlug={lesson.slug} />
+            <SkillGate skillId={lesson.skillIds[0]!} />
           </div>
 
           <div className="mt-6 border-t border-line pt-2">

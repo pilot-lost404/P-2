@@ -108,8 +108,30 @@ export default function PauseAndThink({ block }: { block: Pause }) {
             {correct ? "Correct" : "Not quite"}
           </p>
           <p className="mt-1 text-text">{block.why}</p>
+          <CalibrationNote correct={correct} confidence={saved?.confidence ?? 0.5} />
         </div>
       )}
     </section>
   );
+}
+
+const CONF_LABEL: Record<number, string> = { 0.33: "guessing", 0.66: "fairly sure", 1: "certain" };
+
+/**
+ * Names the gap between how sure the learner was and how it went, at the moment it
+ * happens. Calibration is the one metric here that a self-rater cannot fake, and a
+ * "certain but wrong" answer is the single most useful event in the whole curriculum —
+ * so it gets said out loud rather than being left on a chart on another page.
+ */
+function CalibrationNote({ correct, confidence }: { correct: boolean; confidence: number }) {
+  const label = CONF_LABEL[confidence] ?? (confidence >= 0.9 ? "certain" : "fairly sure");
+  const over = confidence >= 0.9;
+  let text: string | null = null;
+  if (!correct && over)
+    text = `You were ${label} and wrong. That mismatch is the useful part — re-read the paragraph above before moving on.`;
+  else if (correct && confidence <= 0.34)
+    text = "You were guessing and got it. Worth knowing: that is luck, not mastery.";
+  else if (correct && over) text = "Certain and right. This one is holding.";
+  if (!text) return null;
+  return <p className="mt-2 text-sm text-muted">{text}</p>;
 }

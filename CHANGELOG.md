@@ -107,6 +107,12 @@ every `/learn/*` link: all 200. Unknown paths return 404.
   `PACK_CHANGELOG.md` (outside `content/pack/`, where every `.md` is counted as a volume).
 - **`/sources` gained the caveat the metadata already carried**: standards are
   licensed/paywalled, scope is summarised, editions must be checked with the issuer.
+- **The skill gate is now visible where it is actionable.** `computeSkill()` has always
+  returned a `gate` string, but only the dashboard rendered it — one navigation away from
+  the lesson that would clear it. The lesson page now states it under the save button.
+- **"Certain and wrong" gets said out loud.** After each retrieval check the app names the
+  gap between the confidence the learner picked and the result. Calibration is the one
+  metric a self-rater cannot fake, and it was only visible as an aggregate on `/me`.
 - **`/reset-password` crashed without Supabase env vars** — it imported the generated client
   at module scope, and that client throws on first access. It now loads lazily behind
   `supabaseConfigured`.
