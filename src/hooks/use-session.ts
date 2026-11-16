@@ -1,18 +1,51 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { supabaseConfigured } from "@/lib/neet/supabase-env";
 
-/** Client-side session for UI affordances (nav avatar etc.). Server calls re-validate the bearer. */
+/**
+ * Stable per-browser id, used ONLY when Supabase is not configured.
+ *
+ * The server middleware refuses to invent a user for us, so the client supplies a
+ * random id it keeps locally. It is not a credential and grants nothing beyond this
+ * browser's own scratch data — it exists so two preview tabs don't share one profile.
+ */
+export function devUserId(): string {
+  const KEY = "neet.dev.user";
+  try {
+    const existing = localStorage.getItem(KEY);
+    if (existing) return existing;
+    const id =
+      globalThis.crypto?.randomUUID?.() ??
+      `u-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(KEY, id);
+    return id;
+  } catch {
+    return "anonymous-browser";
+  }
+}
+
+/** Client-side session for UI affordances. Server calls re-validate the bearer. */
 export function useSession() {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
+
   useEffect(() => {
-    let alive = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!alive) return;
-      setUser(data.session?.user ?? null);
+    if (!supabaseConfigured) {
       setReady(true);
-    });
+      return;
+    }
+    let alive = true;
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!alive) return;
+        setUser(data.session?.user ?? null);
+        setReady(true);
+      })
+      .catch(() => {
+        if (alive) setReady(true);
+      });
     const { data } = supabase.auth.onAuthStateChange((_e, s) => {
       setUser(s?.user ?? null);
       setReady(true);
@@ -22,6 +55,7 @@ export function useSession() {
       data.subscription.unsubscribe();
     };
   }, []);
+
   return { user, ready };
 }
 

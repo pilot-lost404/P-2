@@ -11,13 +11,13 @@ export default function CalibrationView() {
   if (cal.n === 0) {
     return (
       <div className="rounded-xl border border-dashed border-accent-dim bg-surface p-8 text-center">
-        <h2 className="font-display text-2xl">No confidence data yet.</h2>
+        <h2 className="text-xl font-semibold">No confidence data yet.</h2>
         <p className="mx-auto mt-2 max-w-md text-muted">
           Each pause-and-think question asks how sure you are before you answer. Answer a few and
           your chart appears here.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
-          <Link href="/paths" className="btn-ink ">
+          <Link href="/paths" className="btn-ink">
             Start a lesson
           </Link>
           <button
@@ -104,7 +104,9 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   return (
     <div className="rounded-3xl bg-surface p-5">
       <p className="font-label text-xs uppercase tracking-widest text-muted">{label}</p>
-      <p className={`mt-2 font-display text-4xl ${accent ? "text-accent" : "text-text"}`}>
+      <p
+        className={`mt-2 text-3xl font-semibold tabular-nums ${accent ? "text-accent" : "text-text"}`}
+      >
         {value}
       </p>
     </div>

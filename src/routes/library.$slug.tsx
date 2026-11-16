@@ -1,11 +1,14 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { recordArticleRead } from "@/lib/neet/account.functions";
 import Link from "@/components/neet/AppLink";
 import Breadcrumbs from "@/components/neet/Breadcrumbs";
 import Markdown from "@/components/neet/Markdown";
 import { slugify } from "@/components/neet/LessonBlocks";
 import { LoadError } from "@/components/neet/ui";
 import { getArticle } from "@/lib/neet/library.functions";
-import { pageHead } from "@/lib/neet/meta";
+import { SITE_URL, pageHead } from "@/lib/neet/meta";
 
 export const Route = createFileRoute("/library/$slug")({
   loader: async ({ params }) => {
@@ -17,6 +20,7 @@ export const Route = createFileRoute("/library/$slug")({
     pageHead(
       loaderData?.article.title ?? "Library",
       loaderData?.article.summary.slice(0, 160) || "A volume from the knowledge pack.",
+      loaderData ? `/library/${loaderData.article.slug}` : undefined,
     ),
   errorComponent: ({ error }) => <LoadError error={error} />,
   notFoundComponent: () => (
@@ -30,14 +34,64 @@ export const Route = createFileRoute("/library/$slug")({
   component: ArticlePage,
 });
 
+const VERIFICATION_STYLE: Record<string, string> = {
+  full: "border-ok/40 bg-ok/10 text-text",
+  partial: "border-warn/40 bg-warn/10 text-text",
+  discovery: "border-line bg-surface-2 text-muted",
+  unreachable: "border-line bg-surface-2 text-muted",
+  unaudited: "border-line bg-bg text-muted",
+};
+
+/** Verification is text + border, never colour alone. */
+function VerificationBadge({ v }: { v: { state: string; label: string } }) {
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${
+        VERIFICATION_STYLE[v.state] ?? VERIFICATION_STYLE["unaudited"]
+      }`}
+    >
+      {v.state === "full" ? "✓" : v.state === "partial" ? "◐" : "·"} {v.label}
+    </span>
+  );
+}
+
+/** Article structured data, so search and reading tools see the real title/date. */
+function ArticleJsonLd({ title, summary, slug }: { title: string; summary: string; slug: string }) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: title,
+    description: summary,
+    url: `${SITE_URL}/library/${slug}`,
+    isPartOf: { "@type": "WebSite", name: "NEET", url: SITE_URL },
+    inLanguage: "en",
+    isAccessibleForFree: true,
+  };
+  return (
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  );
+}
+
 function ArticlePage() {
-  const { article, prev, next, fileMap, citedSources } = Route.useLoaderData();
+  const { article, prev, next, fileMap, citedSources, citations } = Route.useLoaderData();
+  const markRead = useServerFn(recordArticleRead);
+
+  // Reading a volume is activity. `article` existed as an event kind but nothing ever
+  // emitted it, so the heatmap ignored the library entirely.
+  useEffect(() => {
+    const day = new Date().toISOString().slice(0, 10);
+    markRead({ data: { slug: article.slug, occurred_on: day } }).catch(() => {
+      /* activity tracking must never break reading */
+    });
+  }, [article.slug, markRead]);
+
   const headings = Array.from(article.body.matchAll(/^##\s+(.+)$/gm)).map((m) =>
     m[1]!.replace(/[*_`]/g, "").trim(),
   );
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-5 lg:grid-cols-[minmax(0,1fr)_15rem]">
+    <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-5 lg:grid-cols-[minmax(0,1fr)_16rem]">
+      <ArticleJsonLd title={article.title} summary={article.summary} slug={article.slug} />
       <article className="min-w-0">
         <Breadcrumbs
           items={[
@@ -50,9 +104,7 @@ function ArticlePage() {
           {article.track} · {Math.max(1, Math.round(article.word_count / 220))} min read ·{" "}
           {article.word_count.toLocaleString()} words
         </p>
-        <h1 className="mt-2 text-3xl font-semibold leading-tight sm:text-4xl md:text-5xl">
-          {article.title}
-        </h1>
+        <h1 className="measure-wide mt-2 text-3xl font-semibold md:text-4xl">{article.title}</h1>
 
         {headings.length > 2 && (
           <details className="mt-6 rounded-2xl bg-surface p-4 lg:hidden">
@@ -76,44 +128,45 @@ function ArticlePage() {
           </details>
         )}
 
-        <div className="mt-6 max-w-[72ch]">
-          <Markdown body={article.body} fileMap={fileMap} />
+        <div className="mt-6">
+          <Markdown body={article.body} fileMap={fileMap} citations={citations} />
         </div>
 
         {citedSources && citedSources.length > 0 && (
           <section id="cited-sources" className="mt-16 border-t border-line pt-10">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-2xl font-semibold leading-tight">Cited sources in this volume</h2>
-              <span className="text-xs font-mono font-medium text-accent">
+              <h2 className="text-2xl font-semibold leading-tight">Cited sources</h2>
+              <span className="rounded-full bg-surface-2 px-2.5 py-0.5 font-mono text-xs font-medium text-muted">
                 {citedSources.length} {citedSources.length === 1 ? "reference" : "references"}
               </span>
             </div>
             <p className="mt-2 text-sm text-muted">
-              Foundational handbooks, international standards, and peer-reviewed research cited or
-              directly applicable to this volume.
+              Each row shows how far the source was actually read. A citation means the volume
+              points at it — not that the whole document was reviewed.
             </p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {citedSources.map((s) => (
                 <div
                   key={s.source_id}
-                  className="group flex flex-col justify-between rounded-2xl border border-line bg-surface p-4 hover:border-accent/40 hover:bg-surface-2 transition-all shadow-xs"
+                  className="group flex flex-col justify-between rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-accent/50"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 text-xs">
-                      <span className="rounded-full bg-ink px-2.5 py-0.5 font-mono text-[11px] font-semibold text-bg">
+                      <span className="rounded-md bg-ink px-2 py-0.5 font-mono text-[11px] font-semibold text-bg">
                         {s.source_id}
                       </span>
-                      <span className="text-muted text-[11px] truncate">{s.source_type}</span>
+                      <span className="truncate text-[11px] text-muted">{s.source_type}</span>
                     </div>
-                    <h3 className="mt-2.5 font-semibold leading-snug text-text group-hover:text-accent transition-colors">
-                      {s.title}
-                    </h3>
+                    <h3 className="mt-2.5 font-semibold leading-snug text-text">{s.title}</h3>
                     {s.relevance && (
-                      <p className="mt-1.5 text-xs text-muted line-clamp-2 leading-relaxed">
+                      <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted">
                         {s.relevance}
                       </p>
                     )}
+                    <div className="mt-2">
+                      <VerificationBadge v={s.verification} />
+                    </div>
                     {s.domain_topics && s.domain_topics.length > 0 && (
                       <div className="mt-2.5 flex flex-wrap gap-1">
                         {s.domain_topics.slice(0, 3).map((topic) => (
@@ -130,7 +183,7 @@ function ArticlePage() {
                   <div className="mt-4 flex items-center justify-between border-t border-line/60 pt-3 text-xs">
                     <Link
                       href={`/sources#${s.source_id}`}
-                      className="font-medium text-accent hover:underline flex items-center gap-1"
+                      className="prose-link inline-flex items-center gap-1 font-medium"
                     >
                       Source register <span>→</span>
                     </Link>
@@ -180,7 +233,7 @@ function ArticlePage() {
 
       <aside className="hidden lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-auto">
         <nav aria-label="On this page">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted">On this page</p>
+          <p className="font-label text-xs uppercase tracking-wide text-muted">On this page</p>
           <ul className="mt-3 space-y-2 border-l border-line pl-4 text-sm">
             {headings.map((h) => (
               <li key={h}>

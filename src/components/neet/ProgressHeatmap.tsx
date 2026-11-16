@@ -65,7 +65,7 @@ export default function ProgressHeatmap({
       >
         <div className="inline-flex flex-col gap-1">
           {!compact && (
-            <div className="flex gap-[3px] pl-0 text-[10px] text-muted">
+            <div className="flex gap-[3px] pl-0 text-[11px] text-muted">
               {grid.map((col, i) => {
                 const first = col[0]!;
                 const d = new Date(first.date + "T00:00:00");

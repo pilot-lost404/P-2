@@ -19,8 +19,8 @@ function PathPage() {
         <p className="font-label text-sm uppercase tracking-widest text-accent">
           {DISCIPLINES[path.discipline].label}
         </p>
-        <h1 className="mt-3 max-w-3xl font-display text-5xl leading-tight">{path.title}</h1>
-        <p className="mt-4 max-w-2xl text-xl text-muted">{path.tagline}</p>
+        <h1 className="measure-wide mt-3 text-4xl font-semibold md:text-5xl">{path.title}</h1>
+        <p className="measure mt-4 text-xl leading-8 text-muted">{path.tagline}</p>
         <p className="mt-6 font-label text-sm text-muted">
           {path.level} · {path.modules.length} modules · {lessons.length} lessons · ~
           {Math.max(1, Math.round(pathMinutes(path) / 60))}h
@@ -31,25 +31,29 @@ function PathPage() {
         </div>
       </header>
 
-      <nav aria-label="On this page" className="mt-6 flex gap-5 font-label text-sm text-muted">
-        <a href="#about-this-course" className="hover:text-accent">
-          About
-        </a>
-        <a href="#roadmap" className="hover:text-accent">
-          Roadmap
-        </a>
-        <a href="#artifact" className="hover:text-accent">
-          Artifact
-        </a>
+      <nav aria-label="On this page" className="mt-6 flex flex-wrap gap-1">
+        {[
+          ["about-this-course", "About"],
+          ["roadmap", "Roadmap"],
+          ["artifact", "Artifact"],
+        ].map(([id, label]) => (
+          <a
+            key={id}
+            href={`#${id}`}
+            className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm text-muted hover:bg-surface hover:text-text"
+          >
+            {label}
+          </a>
+        ))}
       </nav>
 
       <div className="mt-10 grid gap-12 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-14">
           <section id="about-this-course" aria-labelledby="about-h">
-            <h2 id="about-h" className="font-display text-3xl">
+            <h2 id="about-h" className="text-3xl font-semibold">
               About this course
             </h2>
-            <div className="mt-4 max-w-[68ch] space-y-4 text-lg leading-8">
+            <div className="measure mt-4 space-y-4 text-lg leading-8">
               {path.about.map((t) => (
                 <p key={t}>{t}</p>
               ))}
@@ -70,7 +74,7 @@ function PathPage() {
           </section>
 
           <section id="roadmap" aria-labelledby="roadmap-h">
-            <h2 id="roadmap-h" className="mb-5 font-display text-3xl">
+            <h2 id="roadmap-h" className="mb-5 text-2xl font-semibold md:text-3xl">
               Roadmap
             </h2>
             <RoadmapAccordion path={path} />
@@ -82,7 +86,7 @@ function PathPage() {
             <h2 className="font-label text-sm uppercase tracking-widest text-accent">
               Your artifact
             </h2>
-            <p className="mt-3 font-display text-xl">{path.artifact}</p>
+            <p className="mt-3 font-semibold">{path.artifact}</p>
             <p className="mt-2 text-sm text-muted">
               This is the evidence that moves a skill to Proceed.
             </p>

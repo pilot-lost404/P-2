@@ -56,11 +56,13 @@ function Library() {
   useEffect(() => {
     const t = setTimeout(() => {
       navigate({ search: (p) => ({ ...p, q: input || undefined }), replace: true });
+      // `bodyHits === null` means "no full-text search ran yet". Leaving it null made
+      // every row fail the filter, so the list was blank until you typed 3 characters.
+      setBodyHits(input.trim().length >= 3 ? [] : null);
       if (input.trim().length >= 3)
         searchArticles({ data: input })
           .then(setBodyHits)
           .catch(() => setBodyHits(null));
-      else setBodyHits(null);
     }, 250);
     return () => clearTimeout(t);
   }, [input, navigate]);
@@ -80,23 +82,25 @@ function Library() {
         (!t ||
           a.title.toLowerCase().includes(t) ||
           a.summary.toLowerCase().includes(t) ||
-          bodyHits?.includes(a.slug)),
+          // Until the async full-text search returns, match whatever loaded with the page.
+          (bodyHits === null
+            ? a.title.toLowerCase().includes(t) || a.summary.toLowerCase().includes(t)
+            : bodyHits.includes(a.slug))),
     );
   }, [articles, q, track, bodyHits]);
   const groups = tracks
     .map((t) => ({ t, items: filtered.filter((a) => a.track === t) }))
     .filter((g) => g.items.length);
-  const [openSet, setOpenSet] = useState<Set<string>>(() => new Set());
-  const toggle = (t: string) =>
-    setOpenSet((s) => {
-      const n = new Set(s);
-      if (n.has(t)) {
-        n.delete(t);
-      } else {
-        n.add(t);
-      }
-      return n;
-    });
+  // `null` means "the default view": first track open, everything else closed.
+  const [openSet, setOpenSet] = useState<Set<string> | null>(null);
+  const allOpen = openSet !== null && openSet.size === tracks.length;
+  const toggle = (t: string) => {
+    const base = openSet ?? new Set<string>([tracks[0] ?? ""]);
+    const n = new Set(base);
+    if (n.has(t)) n.delete(t);
+    else n.add(t);
+    setOpenSet(n);
+  };
   const words = articles.reduce((n, a) => n + a.word_count, 0);
 
   return (
@@ -131,12 +135,23 @@ function Library() {
         </div>
       </div>
 
-      <p className="mt-10 text-xs font-medium uppercase tracking-[0.2em] text-accent">
-        Curriculum · {tracks.length} tracks · {articles.length} volumes
-      </p>
-      <p className="mt-2 text-muted">
-        Open a track to see its volumes. Each one is a full reading, sourced and cross-linked.
-      </p>
+      <div className="mt-10 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="font-label text-sm uppercase tracking-widest text-accent">
+            {tracks.length} tracks · {articles.length} volumes
+          </p>
+          <p className="mt-1.5 text-muted">
+            Open a track to see its volumes. Each is a full reading, sourced and cross-linked.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpenSet(allOpen ? new Set() : new Set(tracks))}
+          className="btn-soft min-h-11 text-sm"
+        >
+          {allOpen ? "Collapse all" : "Expand all"}
+        </button>
+      </div>
 
       <div className="mt-6 border-t border-line">
         {groups.length === 0 && (
@@ -146,7 +161,7 @@ function Library() {
         )}
         {groups.map(({ t, items }) => {
           const idx = tracks.indexOf(t);
-          const isOpen = !!q || !!track || openSet.has(t);
+          const isOpen = !!q || !!track || (openSet === null ? idx === 0 : openSet.has(t));
           const mins = items.reduce((n, a) => n + Math.max(1, Math.round(a.word_count / 220)), 0);
           return (
             <section key={t} className="border-b border-line">

@@ -1,29 +1,93 @@
-# Welcome to your Lovable project
+# NEET — systems thinking, system design, systems engineering
 
-This project was built with [Lovable](https://lovable.dev).
+> **NEET** here means *we ain't an academy, we're a group*. It is **not** the medical
+> entrance exam and **not** the "Not in Education, Employment, or Training" policy label.
 
-## Build with Lovable
+A learning site: 11 paths / 26 lessons / 10 practice labs across three disciplines, backed
+by a 120-volume reference pack (≈100,000 words, 320 registered sources). Progress is
+evidence-based and decays when unused.
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Running it
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
 npm i
-npm run dev
+npm run dev        # http://localhost:8080
 ```
 
-## Built with
+Supabase is optional. With no `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY`, the app
+runs in **local mode**: progress lives in this browser and in an in-memory server store, and
+`/auth` explains that accounts aren't configured. With credentials present, sessions are
+verified server-side and progress syncs.
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+| Command | What it proves |
+| --- | --- |
+| `npx tsc --noEmit` | Types are clean (strict + `exactOptionalPropertyTypes`). |
+| `npx vitest run` | 3 files / 18 tests: pack integrity, routing, mastery maths. |
+| `npx eslint .` | 0 errors (8 warnings, all pre-existing shadcn `react-refresh`). |
+| `npx vite build` | Production build for Cloudflare Workers. |
+
+## How content works
+
+The knowledge pack under `content/pack/` is the single source of truth.
+
+```
+content/pack/*.md, *.csv
+   └─ node scripts/gen-pack-data.mjs   → src/lib/neet/pack-data.generated.ts   (raw ?raw imports)
+                                       → src/lib/neet/pack-counts.generated.ts (numbers only)
+        └─ src/lib/neet/pack.ts        → parse, query, verification state
+             └─ src/lib/neet/library.functions.ts → server functions
+```
+
+Why generated `?raw` imports rather than `fs` or `import.meta.glob`:
+
+- `node:fs` and `node:sqlite` do not exist on Cloudflare Workers, so reading the pack at
+  request time silently failed in production.
+- `import.meta.glob` is **not** transformed by this Vite/rolldown setup (verified: it
+  returned zero files), so it cannot be used.
+- Explicit `?raw` imports are resolved by any bundler and ship as plain strings, which work
+  on every runtime including tests.
+
+Counts live in their own tiny module so a page can show "120 volumes" without pulling 1 MB
+of markdown into the browser bundle.
+
+## Architecture notes
+
+- **Auth** — every account function runs behind `accountAuth`. A bearer token is only
+  trusted after Supabase `getClaims()` verifies signature and expiry; no token means 401.
+  There is no hand-rolled JWT parsing and no shared fallback user.
+- **Progress** — `ProgressSync` pushes activity *and* scored evidence (`score`,
+  `confidence`, `weight`, `skill_id`), retries on failure and reconnect, backfills once per
+  browser, and merges the account's evidence back into the local store on load. Mastery is
+  therefore reproducible on a second device instead of resetting to zero.
+- **Source honesty** — every source shows how far it was really read (read in full /
+  partially read / found, not fully read / couldn't reach / not audited), derived from
+  `DEEP_SCRAPE_AUDIT.csv`. A citation is never presented as proof of review.
+- **Access** — `/me`, `/me/calibration` and `/learn/...` are public. Signing in adds sync; it
+  is not a gate on the curriculum.
+
+## Design system
+
+Tokens live in `src/styles.css`:
+
+- Type scale: major third (1.25) in `clamp()` with `rem` bounds, six steps, 18px root.
+- Measures: `--measure: 62ch` for prose, `--measure-wide: 72ch` for headings and cards.
+- Contrast: body text ≥ 4.5:1, UI/borders ≥ 3:1, verified numerically (`--accent` was
+  `oklch(0.58)` at 4.34:1 — a real AA failure — and is now `0.52` at 5.55:1).
+- Meaning is never carried by colour alone: citation chips use a ✓ glyph, verification
+  badges pair an icon with a label, prose links stay underlined.
+- 44px minimum tap targets, visible focus rings, `forced-colors` support, and layouts that
+  survive 320px reflow and 200% zoom.
+
+## Project layout
+
+```
+scripts/gen-pack-data.mjs      pack codegen
+content/pack/                  120 volumes + 6 CSV registries
+src/lib/neet/                  content model, pack store, mastery maths, server functions
+src/components/neet/           UI (Markdown, Nav, Dashboard, labs, gates)
+src/routes/                    public routes; _public-account/* for me + learn
+supabase/migrations/, drizzle/ schema (managed via Lovable — do not hand-edit)
+```
+
+`PROJECT_DEEP_DIVE.md` records the full audit this work is based on, including the sources
+behind each design decision.

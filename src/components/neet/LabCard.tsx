@@ -22,7 +22,7 @@ export default function LabCard({ lab }: { lab: Lab }) {
         <span className="text-muted">~{lab.minutes} min</span>
         {sub && <span className="ml-auto text-ok">Submitted</span>}
       </div>
-      <h2 className="mt-3 font-display text-2xl text-text">{lab.title}</h2>
+      <h2 className="mt-3 text-xl font-semibold text-text">{lab.title}</h2>
       <p className="mt-2 text-muted">{lab.brief}</p>
 
       <ol className="mt-4 list-decimal space-y-1 pl-6 marker:font-label marker:text-accent">

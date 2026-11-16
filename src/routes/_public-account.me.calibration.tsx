@@ -7,7 +7,7 @@ function CalibrationPage() {
   return (
     <div className="mx-auto max-w-4xl px-5 py-16">
       <Breadcrumbs items={[{ label: "My progress", href: "/me" }, { label: "Calibration" }]} />
-      <h1 className="mt-8 font-display text-5xl">Confidence vs performance</h1>
+      <h1 className="mt-8 text-4xl font-semibold md:text-5xl">Confidence vs performance</h1>
       <p className="mt-4 max-w-2xl text-lg text-muted">
         How sure you were, against how right you were.
       </p>
@@ -18,7 +18,7 @@ function CalibrationPage() {
   );
 }
 
-export const Route = createFileRoute("/_authenticated/me/calibration")({
+export const Route = createFileRoute("/_public-account/me/calibration")({
   head: () => pageHead("Calibration", "How sure you were, against how right you were."),
   component: CalibrationPage,
 });

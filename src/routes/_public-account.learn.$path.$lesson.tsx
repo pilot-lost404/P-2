@@ -42,10 +42,8 @@ function LessonPage() {
           <p className="mt-8 font-label text-xs uppercase tracking-widest text-accent">
             {module.title} · {lesson.minutes} min · {skill?.title}
           </p>
-          <h1 className="mt-2 max-w-3xl font-display text-4xl leading-tight md:text-5xl">
-            {lesson.title}
-          </h1>
-          <p className="mt-4 max-w-[60ch] text-xl text-muted">{lesson.summary}</p>
+          <h1 className="mt-2 max-w-3xl text-4xl font-semibold md:text-5xl">{lesson.title}</h1>
+          <p className="measure mt-4 text-xl leading-8 text-muted">{lesson.summary}</p>
           <div className="mt-5">
             <SaveButton pathSlug={path.slug} lessonSlug={lesson.slug} />
           </div>
@@ -68,18 +66,24 @@ function LessonPage() {
             <p className="font-label text-xs uppercase tracking-widest text-muted">
               In this lesson
             </p>
-            <ul className="mt-3 space-y-2 border-l border-line pl-4 text-sm">
+            <ul className="mt-2 space-y-0.5 border-l border-line pl-1 text-sm">
               {headings.map((h) => (
                 <li key={h.t === "h2" ? h.text : ""}>
                   {h.t === "h2" && (
-                    <a href={`#${slugify(h.text)}`} className="text-muted hover:text-accent">
+                    <a
+                      href={`#${slugify(h.text)}`}
+                      className="flex min-h-11 items-center rounded-r-md px-3 text-muted hover:bg-surface hover:text-text"
+                    >
                       {h.text}
                     </a>
                   )}
                 </li>
               ))}
               <li>
-                <a href="#explain" className="text-muted hover:text-accent">
+                <a
+                  href="#explain"
+                  className="flex min-h-11 items-center rounded-r-md px-3 text-muted hover:bg-surface hover:text-text"
+                >
                   Explain it back
                 </a>
               </li>
@@ -101,7 +105,7 @@ function LessonPage() {
   );
 }
 
-export const Route = createFileRoute("/_authenticated/learn/$path/$lesson")({
+export const Route = createFileRoute("/_public-account/learn/$path/$lesson")({
   loader: ({ params }) => {
     const path = PATHS.find((p) => p.slug === params.path);
     if (!path) throw notFound();

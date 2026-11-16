@@ -10,7 +10,7 @@ export const slugify = (s: string) =>
 
 export default function LessonBlocks({ blocks }: { blocks: Block[] }) {
   return (
-    <div className="max-w-[68ch]">
+    <div className="measure">
       {blocks.map((b, i) => {
         switch (b.t) {
           case "h2":
@@ -18,22 +18,22 @@ export default function LessonBlocks({ blocks }: { blocks: Block[] }) {
               <h2
                 key={i}
                 id={slugify(b.text)}
-                className="mb-3 mt-10 font-display text-3xl leading-tight text-text"
+                className="mb-3 mt-12 text-2xl font-semibold text-text md:text-3xl"
               >
                 {b.text}
               </h2>
             );
           case "p":
             return (
-              <p key={i} className="my-4 text-[1.0625rem] leading-8 text-text/95">
+              <p key={i} className="my-5 text-[1.0625rem] leading-[1.7] text-text">
                 {b.text}
               </p>
             );
           case "ul":
             return (
-              <ul key={i} className="my-4 list-disc space-y-2 pl-6 marker:text-accent">
+              <ul key={i} className="my-5 list-disc space-y-2 pl-6 marker:text-accent">
                 {b.items.map((it) => (
-                  <li key={it} className="leading-7">
+                  <li key={it} className="leading-[1.7]">
                     {it}
                   </li>
                 ))}

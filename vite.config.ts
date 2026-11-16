@@ -12,4 +12,12 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      // The hosted preview proxies this dev server under a per-session hostname
+      // (*.e2b.app). Without this allowlist Vite answers 403 "Blocked request" and
+      // the preview shows nothing at all.
+      allowedHosts: [".e2b.app", ".lovable.app", "localhost"],
+    },
+  },
 });

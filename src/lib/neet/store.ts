@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { PATHS, flatLessons, lessonKey } from "./content";
+import { LABS, PATHS, flatLessons, lessonKey } from "./content";
 import type { Evidence, Lab } from "./types";
 
 export interface State {
@@ -69,6 +69,9 @@ export function useProgress(): State {
   return useSyncExternalStore(subscribe, read, () => EMPTY);
 }
 
+/** Fired after `actions.mergeRemote` so the UI can tell replaced from appended. */
+export const PROGRESS_MERGED = "neet:progress-merged";
+
 /** True once running in the browser, so UIs can avoid flashing empty states. */
 export function useHydrated(): boolean {
   return useSyncExternalStore(
@@ -83,12 +86,33 @@ export interface ProgressSignal {
   kind: ProgressKind;
   ref: string;
   skillId?: string | undefined;
+  /** Evidence fields. Without these, mastery could not be rebuilt on a new device. */
+  score?: number | undefined;
+  confidence?: number | undefined;
+  weight?: number | undefined;
+  at?: string | undefined;
 }
 
 /** Broadcast a finished activity; ProgressSync forwards it to the account when signed in. */
 export function emitProgress(sig: ProgressSignal) {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent<ProgressSignal>("neet:progress", { detail: sig }));
+}
+
+/**
+ * Which skill a stored evidence row belongs to.
+ *
+ * Quiz refs are pause ids (`<lessonKey>:<n>`), explain refs are `explain:<lessonKey>`,
+ * and lab refs are lab ids — the first two can be resolved back to a lesson.
+ */
+export function evidenceSkillFor(kind: string, ref: string): string | undefined {
+  if (kind === "quiz") {
+    const key = ref.split(":").slice(0, -1).join(":");
+    if (key) return lessonSkill(key);
+  }
+  if (kind === "explain") return lessonSkill(ref.replace(/^explain:/, ""));
+  const lab = LABS.find((l) => l.id === ref);
+  return lab?.skillId;
 }
 
 export function lessonSkill(key: string): string | undefined {
@@ -106,6 +130,54 @@ const toggle = (list: string[], v: string) =>
   list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
 
 export const actions = {
+  /**
+   * Merge evidence that came from the account into the local store.
+   *
+   * The dashboard used to compute mastery from localStorage only, so on a new device the
+   * heatmap (synced) was full while the Proceed Scale (local) read zero. Evidence is now
+   * round-tripped, and this rehydrates it. Keyed by skill + ref so re-syncing is
+   * idempotent and never double-counts a quiz.
+   */
+  mergeRemote(
+    rows: {
+      kind: string;
+      ref: string;
+      occurred_on: string;
+      score: number | null;
+      confidence: number | null;
+      weight: number | null;
+    }[],
+  ) {
+    if (rows.length === 0) return;
+    const s = read();
+    const seen = new Set(s.evidence.map((e) => `${e.skillId}|${e.ref ?? ""}`));
+    const added: Evidence[] = [];
+    for (const r of rows) {
+      if (r.score === null || !r.ref) continue;
+      const skillId = evidenceSkillFor(r.kind, r.ref);
+      if (!skillId) continue;
+      const key = `${skillId}|${r.ref}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      added.push({
+        skillId,
+        type: (r.kind === "quiz" || r.kind === "explain" || r.kind === "lab"
+          ? r.kind
+          : "lab") as Evidence["type"],
+        score: r.score,
+        weight: r.weight ?? 1,
+        at: `${r.occurred_on}T12:00:00.000Z`,
+        ...(r.confidence === null ? {} : { confidence: r.confidence }),
+        ref: r.ref,
+      });
+    }
+    if (added.length === 0) return;
+    write({ ...s, evidence: [...s.evidence, ...added] });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent(PROGRESS_MERGED, { detail: added.length }));
+    }
+  },
+
   toggleComplete(key: string) {
     const s = read();
     const done = !s.completed.includes(key);
@@ -133,7 +205,14 @@ export const actions = {
       answers: { ...s.answers, [id]: { choice, confidence } },
       evidence: [...s.evidence, ev],
     });
-    emitProgress({ kind: "quiz", ref: id, skillId });
+    emitProgress({
+      kind: "quiz",
+      ref: id,
+      skillId,
+      score: correct ? 1 : 0,
+      confidence,
+      weight: 1,
+    });
   },
   explainBack(lessonKeyStr: string, skillId: string, text: string, rating: number) {
     const s = read();
@@ -151,7 +230,13 @@ export const actions = {
       evidence: [...prior, ev],
       explains: { ...s.explains, [lessonKeyStr]: { text, rating } },
     });
-    emitProgress({ kind: "explain", ref: lessonKeyStr, skillId });
+    emitProgress({
+      kind: "explain",
+      ref: `explain:${lessonKeyStr}`,
+      skillId,
+      score: rating / 3,
+      weight: 1.5,
+    });
   },
   submitLab(lab: Lab, note: string, rating: number) {
     const s = read();
@@ -170,7 +255,13 @@ export const actions = {
       evidence: [...prior, ev],
       labs: { ...s.labs, [lab.id]: { note, rating, at: ev.at } },
     });
-    emitProgress({ kind: "lab", ref: lab.id, skillId: lab.skillId });
+    emitProgress({
+      kind: "lab",
+      ref: lab.id,
+      skillId: lab.skillId,
+      score: rating / 3,
+      weight,
+    });
   },
   loadDemo() {
     const day = 86_400_000;

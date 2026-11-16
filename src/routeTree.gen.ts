@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as PublicAccountRouteImport } from './routes/_public-account'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as CoverageRouteImport } from './routes/coverage'
@@ -24,17 +24,17 @@ import { Route as LibraryIndexRouteImport } from './routes/library.index'
 import { Route as LibrarySlugRouteImport } from './routes/library.$slug'
 import { Route as PathsIndexRouteImport } from './routes/paths.index'
 import { Route as PathsSlugRouteImport } from './routes/paths.$slug'
-import { Route as AuthenticatedMeIndexRouteImport } from './routes/_authenticated/me.index'
-import { Route as AuthenticatedMeCalibrationRouteImport } from './routes/_authenticated/me.calibration'
-import { Route as AuthenticatedLearnPathLessonRouteImport } from './routes/_authenticated/learn.$path.$lesson'
+import { Route as PublicAccountMeIndexRouteImport } from './routes/_public-account.me.index'
+import { Route as PublicAccountMeCalibrationRouteImport } from './routes/_public-account.me.calibration'
+import { Route as PublicAccountLearnPathLessonRouteImport } from './routes/_public-account.learn.$path.$lesson'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const PublicAccountRoute = PublicAccountRouteImport.update({
+  id: '/_public-account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -102,22 +102,22 @@ const PathsSlugRoute = PathsSlugRouteImport.update({
   path: '/paths/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedMeIndexRoute = AuthenticatedMeIndexRouteImport.update({
+const PublicAccountMeIndexRoute = PublicAccountMeIndexRouteImport.update({
   id: '/me/',
   path: '/me/',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => PublicAccountRoute,
 } as any)
-const AuthenticatedMeCalibrationRoute =
-  AuthenticatedMeCalibrationRouteImport.update({
+const PublicAccountMeCalibrationRoute =
+  PublicAccountMeCalibrationRouteImport.update({
     id: '/me/calibration',
     path: '/me/calibration',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    getParentRoute: () => PublicAccountRoute,
   } as any)
-const AuthenticatedLearnPathLessonRoute =
-  AuthenticatedLearnPathLessonRouteImport.update({
+const PublicAccountLearnPathLessonRoute =
+  PublicAccountLearnPathLessonRouteImport.update({
     id: '/learn/$path/$lesson',
     path: '/learn/$path/$lesson',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    getParentRoute: () => PublicAccountRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -135,9 +135,9 @@ export interface FileRoutesByFullPath {
   '/paths/$slug': typeof PathsSlugRoute
   '/library/': typeof LibraryIndexRoute
   '/paths/': typeof PathsIndexRoute
-  '/me/calibration': typeof AuthenticatedMeCalibrationRoute
-  '/me/': typeof AuthenticatedMeIndexRoute
-  '/learn/$path/$lesson': typeof AuthenticatedLearnPathLessonRoute
+  '/me/calibration': typeof PublicAccountMeCalibrationRoute
+  '/me/': typeof PublicAccountMeIndexRoute
+  '/learn/$path/$lesson': typeof PublicAccountLearnPathLessonRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -154,14 +154,14 @@ export interface FileRoutesByTo {
   '/paths/$slug': typeof PathsSlugRoute
   '/library': typeof LibraryIndexRoute
   '/paths': typeof PathsIndexRoute
-  '/me/calibration': typeof AuthenticatedMeCalibrationRoute
-  '/me': typeof AuthenticatedMeIndexRoute
-  '/learn/$path/$lesson': typeof AuthenticatedLearnPathLessonRoute
+  '/me/calibration': typeof PublicAccountMeCalibrationRoute
+  '/me': typeof PublicAccountMeIndexRoute
+  '/learn/$path/$lesson': typeof PublicAccountLearnPathLessonRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_public-account': typeof PublicAccountRouteWithChildren
   '/auth': typeof AuthRoute
   '/careers': typeof CareersRoute
   '/coverage': typeof CoverageRoute
@@ -175,9 +175,9 @@ export interface FileRoutesById {
   '/paths/$slug': typeof PathsSlugRoute
   '/library/': typeof LibraryIndexRoute
   '/paths/': typeof PathsIndexRoute
-  '/_authenticated/me/calibration': typeof AuthenticatedMeCalibrationRoute
-  '/_authenticated/me/': typeof AuthenticatedMeIndexRoute
-  '/_authenticated/learn/$path/$lesson': typeof AuthenticatedLearnPathLessonRoute
+  '/_public-account/me/calibration': typeof PublicAccountMeCalibrationRoute
+  '/_public-account/me/': typeof PublicAccountMeIndexRoute
+  '/_public-account/learn/$path/$lesson': typeof PublicAccountLearnPathLessonRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -221,7 +221,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
+    | '/_public-account'
     | '/auth'
     | '/careers'
     | '/coverage'
@@ -235,14 +235,14 @@ export interface FileRouteTypes {
     | '/paths/$slug'
     | '/library/'
     | '/paths/'
-    | '/_authenticated/me/calibration'
-    | '/_authenticated/me/'
-    | '/_authenticated/learn/$path/$lesson'
+    | '/_public-account/me/calibration'
+    | '/_public-account/me/'
+    | '/_public-account/learn/$path/$lesson'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  PublicAccountRoute: typeof PublicAccountRouteWithChildren
   AuthRoute: typeof AuthRoute
   CareersRoute: typeof CareersRoute
   CoverageRoute: typeof CoverageRoute
@@ -267,11 +267,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
+    '/_public-account': {
+      id: '/_public-account'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      preLoaderRoute: typeof PublicAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -365,48 +365,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PathsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/me/': {
-      id: '/_authenticated/me/'
+    '/_public-account/me/': {
+      id: '/_public-account/me/'
       path: '/me'
       fullPath: '/me/'
-      preLoaderRoute: typeof AuthenticatedMeIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof PublicAccountMeIndexRouteImport
+      parentRoute: typeof PublicAccountRoute
     }
-    '/_authenticated/me/calibration': {
-      id: '/_authenticated/me/calibration'
+    '/_public-account/me/calibration': {
+      id: '/_public-account/me/calibration'
       path: '/me/calibration'
       fullPath: '/me/calibration'
-      preLoaderRoute: typeof AuthenticatedMeCalibrationRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof PublicAccountMeCalibrationRouteImport
+      parentRoute: typeof PublicAccountRoute
     }
-    '/_authenticated/learn/$path/$lesson': {
-      id: '/_authenticated/learn/$path/$lesson'
+    '/_public-account/learn/$path/$lesson': {
+      id: '/_public-account/learn/$path/$lesson'
       path: '/learn/$path/$lesson'
       fullPath: '/learn/$path/$lesson'
-      preLoaderRoute: typeof AuthenticatedLearnPathLessonRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof PublicAccountLearnPathLessonRouteImport
+      parentRoute: typeof PublicAccountRoute
     }
   }
 }
 
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedMeCalibrationRoute: typeof AuthenticatedMeCalibrationRoute
-  AuthenticatedMeIndexRoute: typeof AuthenticatedMeIndexRoute
-  AuthenticatedLearnPathLessonRoute: typeof AuthenticatedLearnPathLessonRoute
+interface PublicAccountRouteChildren {
+  PublicAccountMeCalibrationRoute: typeof PublicAccountMeCalibrationRoute
+  PublicAccountMeIndexRoute: typeof PublicAccountMeIndexRoute
+  PublicAccountLearnPathLessonRoute: typeof PublicAccountLearnPathLessonRoute
 }
 
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedMeCalibrationRoute: AuthenticatedMeCalibrationRoute,
-  AuthenticatedMeIndexRoute: AuthenticatedMeIndexRoute,
-  AuthenticatedLearnPathLessonRoute: AuthenticatedLearnPathLessonRoute,
+const PublicAccountRouteChildren: PublicAccountRouteChildren = {
+  PublicAccountMeCalibrationRoute: PublicAccountMeCalibrationRoute,
+  PublicAccountMeIndexRoute: PublicAccountMeIndexRoute,
+  PublicAccountLearnPathLessonRoute: PublicAccountLearnPathLessonRoute,
 }
 
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+const PublicAccountRouteWithChildren = PublicAccountRoute._addFileChildren(
+  PublicAccountRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  PublicAccountRoute: PublicAccountRouteWithChildren,
   AuthRoute: AuthRoute,
   CareersRoute: CareersRoute,
   CoverageRoute: CoverageRoute,

@@ -18,16 +18,17 @@ import CommandPalette from "@/components/neet/CommandPalette";
 import ProgressSync from "@/components/neet/ProgressSync";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { supabaseConfigured } from "@/lib/neet/supabase-env";
 
 function NotFoundComponent() {
   return (
     <div className="mx-auto max-w-2xl px-5 py-32 text-center">
       <p className="font-label text-sm uppercase tracking-widest text-accent">404</p>
-      <h1 className="mt-3 font-display text-5xl">Off the map.</h1>
+      <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Off the map.</h1>
       <p className="mt-4 text-muted">
         That page does not exist. Try the paths, or press ⌘K to search.
       </p>
-      <Link to="/paths" className="mt-8 inline-block btn-ink ">
+      <Link to="/paths" className="mt-8 inline-flex btn-ink">
         Browse paths
       </Link>
     </div>
@@ -60,7 +61,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
           >
             Try again
           </button>
-          <a href="/" className="rounded-full bg-surface-2 px-4 py-2 text-sm text-text">
+          <a href="/" className="btn-soft text-sm">
             Go home
           </a>
         </div>
@@ -114,6 +115,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   useEffect(() => {
+    if (!supabaseConfigured) return;
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();

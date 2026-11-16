@@ -30,6 +30,7 @@ const PAGES: Item[] = [
     keywords: "search know adapt proceed scale",
   },
   { label: "My progress", hint: "Page", href: "/me", keywords: "dashboard scale radar" },
+  { label: "Content status", hint: "Page", href: "/health", keywords: "health status pack intact" },
   {
     label: "Calibration",
     hint: "Page",

@@ -16,6 +16,37 @@ export const Route = createFileRoute("/sources")({
   component: Sources,
 });
 
+const VERIFY_STYLE: Record<string, string> = {
+  full: "border-ok/40 bg-ok/10",
+  partial: "border-warn/40 bg-warn/10",
+  discovery: "border-line bg-surface-2",
+  unreachable: "border-line bg-surface-2",
+  unaudited: "border-line bg-bg",
+};
+
+const VERIFY_ICON: Record<string, string> = {
+  full: "✓",
+  partial: "◐",
+  discovery: "·",
+  unreachable: "✕",
+  unaudited: "?",
+};
+
+/** Verification uses an icon, a border and a label — never colour alone (WCAG 1.4.1). */
+function VerificationPill({ verification }: { verification: { state: string; label: string } }) {
+  return (
+    <span
+      title={verification.label}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium text-text ${
+        VERIFY_STYLE[verification.state] ?? VERIFY_STYLE["unaudited"]
+      }`}
+    >
+      <span aria-hidden>{VERIFY_ICON[verification.state] ?? "?"}</span>
+      {verification.label}
+    </span>
+  );
+}
+
 function Sources() {
   const sources = Route.useLoaderData();
   const [q, setQ] = useState("");
@@ -24,16 +55,20 @@ function Sources() {
   const [limit, setLimit] = useState(50);
   const [activeHash, setActiveHash] = useState<string>("");
 
+  // Deep links like /sources#S254 point at a source that may sit past the initial
+  // 50-row window, so raise the limit until the target is rendered and scroll to it.
+  useEffect(() => {
+    const raw = window.location.hash.replace("#", "");
+    if (!raw) return;
+    const i = sources.findIndex((s) => s.source_id.toLowerCase() === raw.toLowerCase());
+    if (i >= 0 && i >= limit) setLimit(i + 1);
+  }, [sources, limit]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "");
       if (hash) {
         setActiveHash(hash);
-        // Find index of targeted source and expand limit if needed
-        const idx = sources.findIndex((s) => s.source_id.toLowerCase() === hash.toLowerCase());
-        if (idx >= 0 && idx >= limit) {
-          setLimit(idx + 20);
-        }
         setTimeout(() => {
           const el = document.getElementById(hash);
           if (el) {
@@ -72,7 +107,6 @@ function Sources() {
       if (!matchType || !matchTopic) return false;
       if (!t) return true;
 
-      const articleTitles = s.cited_in_articles?.map((a) => a.title).join(" ") || "";
       const topicsStr = s.domain_topics?.join(" ") || "";
       const fullSearch = [
         s.source_id,
@@ -81,10 +115,9 @@ function Sources() {
         s.source_type,
         s.limitations,
         s.takeaways,
-        s.audit?.status,
-        s.audit?.tools,
+        s.verification.label,
+        s.verification.status,
         topicsStr,
-        articleTitles,
       ]
         .filter(Boolean)
         .join(" ")
@@ -97,9 +130,8 @@ function Sources() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-5 md:py-16">
       <PageHeader eyebrow="Sources" title="Source register">
-        {sources.length} records. Every handbook, standard, paper and tool mapped directly to the
-        knowledge pack volumes where it is cited, with verified audit status and practical
-        takeaways.
+        {sources.length} records. Each row shows how far it was actually read — a source in the
+        register is not proof its content was reviewed.
       </PageHeader>
 
       <div className="mt-8 space-y-4">
@@ -196,19 +228,7 @@ function Sources() {
                   {s.source_type && <span className="font-medium text-muted">{s.source_type}</span>}
                 </div>
 
-                {s.audit && (
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${
-                      s.audit.status.toLowerCase().includes("full")
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                        : s.audit.status.toLowerCase().includes("targeted")
-                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
-                          : "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20"
-                    }`}
-                  >
-                    {s.audit.status}
-                  </span>
-                )}
+                <VerificationPill verification={s.verification} />
               </div>
 
               <h2 className="mt-3 text-lg font-semibold leading-snug">
@@ -245,33 +265,10 @@ function Sources() {
                 {s.takeaways && <Field label="Key takeaway">{s.takeaways}</Field>}
                 <Field label="Quality signal">{s.quality_signal}</Field>
                 <Field label="Limitations">{s.limitations}</Field>
-                {s.audit?.extraction_extent && (
-                  <Field label="Extraction extent">{s.audit.extraction_extent}</Field>
+                {s.verification.status && (
+                  <Field label="Audit record">{s.verification.status}</Field>
                 )}
               </dl>
-
-              {s.cited_in_articles && s.cited_in_articles.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-line/60">
-                  <span className="text-xs font-semibold text-muted uppercase tracking-wider">
-                    Cited in {s.cited_in_articles.length}{" "}
-                    {s.cited_in_articles.length === 1 ? "volume" : "volumes"}:
-                  </span>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {s.cited_in_articles.map((art) => (
-                      <Link
-                        key={art.slug}
-                        href={`/library/${art.slug}`}
-                        className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-0.5 text-xs text-text hover:bg-accent/20 hover:text-accent transition-colors border border-transparent hover:border-accent/30"
-                      >
-                        <span className="font-mono text-[10px] text-muted">
-                          {art.number !== null ? `No. ${art.number}` : "Guide"}
-                        </span>
-                        <span className="truncate max-w-[200px]">{art.title}</span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
             </li>
           );
         })}

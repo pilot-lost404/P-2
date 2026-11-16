@@ -17,7 +17,7 @@ function MethodPage() {
   return (
     <div className="mx-auto max-w-4xl px-5 py-16">
       <p className="font-label text-sm uppercase tracking-widest text-accent">The method</p>
-      <h1 className="mt-2 font-display text-5xl">The Proceed Scale</h1>
+      <h1 className="mt-2 text-4xl font-semibold md:text-5xl">The Proceed Scale</h1>
       <Motto className="mt-5 text-lg" />
       <p className="mt-6 max-w-2xl text-lg text-muted">
         Every skill moves through four stages. You do not advance by clicking
@@ -33,7 +33,7 @@ function MethodPage() {
           >
             <p className="font-label text-sm text-accent">Level {s.level}</p>
             <div>
-              <h2 className="font-display text-2xl">{s.label}</h2>
+              <h2 className="text-xl font-semibold">{s.label}</h2>
               <p className="mt-1 text-muted">{s.meaning}</p>
             </div>
             <div>
@@ -46,7 +46,7 @@ function MethodPage() {
       <p className="mt-4 text-muted">Level 0 means unseen: no evidence yet.</p>
 
       <section className="mt-16" aria-labelledby="how-h">
-        <h2 id="how-h" className="font-display text-3xl">
+        <h2 id="how-h" className="text-3xl font-semibold">
           How mastery is calculated
         </h2>
         <pre className="mt-4 overflow-x-auto rounded-lg border border-line bg-surface p-5 font-label text-sm leading-7">{`quality  = Σ(weight × score × decay) ÷ Σ(weight)
@@ -90,7 +90,7 @@ Level 4  mastery ≥ 0.80 and an artifact`}</pre>
       </section>
 
       <section className="mt-16 rounded-3xl bg-surface ring-1 ring-accent-dim p-8">
-        <h2 className="font-display text-3xl">Calibration</h2>
+        <h2 className="text-3xl font-semibold">Calibration</h2>
         <p className="mt-3 max-w-2xl text-muted">
           Before each question you say how sure you are. The gap between that confidence and your
           results is a metric of its own. Knowing what you do not know is part of learning.

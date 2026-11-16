@@ -26,7 +26,7 @@ export default function PauseAndThink({ block }: { block: Pause }) {
       className="my-8 rounded-3xl bg-surface ring-1 ring-accent-dim p-6"
     >
       <p className="font-label text-xs uppercase tracking-widest text-accent">Pause and think</p>
-      <h3 id={`${block.id}-q`} className="mt-2 font-display text-xl text-text">
+      <h3 id={`${block.id}-q`} className="mt-2 text-lg font-semibold text-text">
         {block.q}
       </h3>
 

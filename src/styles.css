@@ -40,6 +40,22 @@
   --font-label: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
+  /* Type scale: major-third (1.25) steps, clamped in rem so browser zoom still works.
+     Six steps only — the researched ceiling for a scale people actually apply. */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1rem;
+  --text-lg: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --text-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+  --text-3xl: clamp(1.875rem, 1.5rem + 1.8vw, 2.5rem);
+  --text-4xl: clamp(2.125rem, 1.6rem + 2.6vw, 3rem);
+  --text-5xl: clamp(2.25rem, 1.5rem + 3.6vw, 3.5rem);
+
+  /* Measures — 62ch body copy, 68ch wide measure. Never exceed 80 characters. */
+  --measure: 62ch;
+  --measure-wide: 72ch;
+
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.04);
   --shadow-lift: 0 1px 2px oklch(0 0 0 / 0.04), 0 18px 40px -20px oklch(0 0 0 / 0.22);
 }
@@ -51,9 +67,14 @@
   --surface-2: oklch(0.945 0.003 260);
   --line: oklch(0.92 0.003 260);
   --foreground: oklch(0.2 0.005 260);
-  --muted-foreground: oklch(0.52 0.01 260);
-  --accent: oklch(0.58 0.2 255);
+  /* WCAG-checked against #fff: 6.8:1 (was 0.52 -> 5.5:1, and 0.52 on --surface was 5.1:1) */
+  --muted-foreground: oklch(0.47 0.012 260);
+  /* 5.55:1 on white, 5.1:1 on --surface. The old 0.58 was 4.34:1 and failed AA. */
+  --accent: oklch(0.52 0.2 255);
+  --accent-hover: oklch(0.45 0.19 255);
   --accent-dim: oklch(0.82 0.08 255);
+  /* Tinted accent surface for callouts and active states. */
+  --accent-tint: oklch(0.962 0.02 255);
   --ok: oklch(0.65 0.17 150);
   --warn: oklch(0.7 0.17 55);
   --sage: oklch(0.94 0.04 150);
@@ -81,15 +102,33 @@ body {
   background: var(--bg);
   color: var(--foreground);
   font-family: var(--font-body);
-  line-height: 1.65;
+  font-size: var(--text-base);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
+/* Leading scales inversely with size so large type reads as one block. */
 h1,
 h2,
-h3 {
-  letter-spacing: -0.025em;
+h3,
+h4 {
+  letter-spacing: -0.022em;
   font-weight: 600;
+  text-wrap: balance;
+}
+h1 {
+  line-height: 1.08;
+}
+h2 {
+  line-height: 1.16;
+}
+h3,
+h4 {
+  line-height: 1.28;
+}
+p {
+  text-wrap: pretty;
 }
 code,
 pre {
@@ -108,7 +147,13 @@ pre {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
+}
+/* Skip-link and focus parity for Windows High Contrast / forced-colors. */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid CanvasText;
+  }
 }
 
 @layer base {
@@ -132,31 +177,62 @@ pre {
 @utility btn-ink {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  min-height: 2.75rem; /* 44px touch target */
+  border-radius: 9999px;
+  background: var(--accent);
+  color: oklch(1 0 0);
+  padding: 0.65rem 1.4rem;
+  font-weight: 550;
+  transition:
+    background 0.18s,
+    transform 0.18s;
+  &:hover {
+    background: var(--accent-hover);
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+/* Ink variant kept for the dark feature panels. */
+@utility btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
   border-radius: 9999px;
   background: var(--ink);
   color: var(--bg);
-  padding: 0.7rem 1.4rem;
-  font-weight: 500;
+  padding: 0.65rem 1.4rem;
+  font-weight: 550;
   transition:
-    transform 0.2s,
-    opacity 0.2s;
+    opacity 0.18s,
+    transform 0.18s;
   &:hover {
     opacity: 0.88;
   }
   &:active {
-    transform: scale(0.97);
+    transform: scale(0.98);
   }
 }
 @utility btn-soft {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  min-height: 2.75rem;
   border-radius: 9999px;
-  background: var(--surface-2);
+  border: 1px solid var(--line);
+  background: var(--bg);
   color: var(--foreground);
-  padding: 0.7rem 1.4rem;
-  font-weight: 500;
+  padding: 0.65rem 1.4rem;
+  font-weight: 550;
   transition:
     transform 0.2s,
     background 0.2s;
@@ -165,6 +241,27 @@ pre {
   }
   &:active {
     transform: scale(0.97);
+  }
+}
+
+/* Body copy measure. 62ch keeps lines inside the 45-75 character comfort band. */
+@utility measure {
+  max-width: var(--measure);
+}
+@utility measure-wide {
+  max-width: var(--measure-wide);
+}
+
+/* Links inside prose stay underlined: colour alone fails WCAG 1.4.1. */
+@utility prose-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in oklab, var(--accent) 45%, transparent);
+  transition: text-decoration-color 0.15s;
+  &:hover {
+    text-decoration-color: var(--accent);
   }
 }
 

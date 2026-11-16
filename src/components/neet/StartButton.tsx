@@ -11,7 +11,7 @@ export default function StartButton({ path }: { path: Path }) {
   const label =
     p.done === 0 ? "Start this path" : p.done === p.total ? "Review this path" : "Continue";
   return (
-    <Link href={lessonHref(path.slug, target!.lesson.slug)} className="inline-block btn-ink ">
+    <Link href={lessonHref(path.slug, target!.lesson.slug)} className="inline-flex btn-ink">
       {label} →
     </Link>
   );

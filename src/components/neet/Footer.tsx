@@ -76,11 +76,13 @@ export default function Footer() {
             </li>
             <li>
               <Link className="hover:text-accent" href="/health">
-                System health
+                Content status
               </Link>
             </li>
           </ul>
-          <p className="mt-6 text-sm text-muted">Progress is saved in this browser only.</p>
+          <p className="mt-6 text-sm leading-6 text-muted">
+            Progress is kept in this browser. Sign in to keep it across devices.
+          </p>
         </div>
       </div>
     </footer>

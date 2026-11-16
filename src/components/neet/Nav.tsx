@@ -6,13 +6,20 @@ import ProfileMenu from "./ProfileCard";
 import { useSession } from "@/hooks/use-session";
 
 const LINKS = [
-  { href: "/library", label: "Library" },
   { href: "/paths", label: "Paths" },
+  { href: "/labs", label: "Labs" },
+  { href: "/library", label: "Library" },
   { href: "/sources", label: "Sources" },
-  { href: "/coverage", label: "Coverage" },
+  { href: "/me", label: "Progress" },
+];
+
+/** The rest, reachable from the footer and the command palette rather than the bar. */
+const MORE = [
+  { href: "/method", label: "The method" },
   { href: "/exercises", label: "Exercises" },
   { href: "/careers", label: "Careers" },
-  { href: "/me", label: "Progress" },
+  { href: "/coverage", label: "Research coverage" },
+  { href: "/health", label: "Content status" },
 ];
 
 export default function Nav() {
@@ -20,6 +27,13 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
   const { user, ready } = useSession();
   const openPalette = () => window.dispatchEvent(new Event("neet:palette"));
+
+  // Close the mobile sheet whenever the route changes.
+  const [lastPath, setLastPath] = useState(pathname);
+  if (pathname !== lastPath) {
+    setLastPath(pathname);
+    if (open) setOpen(false);
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-line glass">
@@ -39,9 +53,17 @@ export default function Nav() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-md px-2.5 py-2 text-sm ${active ? "text-accent" : "text-muted hover:text-text"}`}
+                className={`relative rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  active ? "text-text" : "text-muted hover:text-text"
+                }`}
               >
                 {l.label}
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-3 -bottom-[1px] h-0.5 rounded-full bg-accent"
+                  />
+                )}
               </Link>
             );
           })}
@@ -52,7 +74,7 @@ export default function Nav() {
             type="button"
             onClick={openPalette}
             aria-label="Search (Command K)"
-            className="flex items-center gap-2 rounded-md border border-line px-3 py-1.5 text-sm text-muted hover:border-accent-dim hover:text-text"
+            className="flex min-h-11 items-center gap-2 rounded-lg border border-line px-3 text-sm text-muted hover:border-accent hover:text-text"
           >
             <svg
               width="16"
@@ -81,7 +103,7 @@ export default function Nav() {
             ))}
           <button
             type="button"
-            className="rounded-md border border-line p-2 text-muted lg:hidden"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-line text-muted lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label="Menu"
@@ -104,13 +126,14 @@ export default function Nav() {
 
       {open && (
         <div id="mobile-menu" className="border-t border-line bg-surface px-5 py-4 lg:hidden">
-          <nav aria-label="Mobile" className="flex flex-col gap-1">
-            {LINKS.map((l) => (
+          <nav aria-label="Mobile" className="flex flex-col">
+            {[...LINKS, ...MORE].map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-3 text-text hover:bg-surface-2"
+                aria-current={pathname === l.href ? "page" : undefined}
+                className="flex min-h-11 items-center rounded-lg px-3 text-base text-text hover:bg-surface-2 aria-[current=page]:text-accent"
               >
                 {l.label}
               </Link>

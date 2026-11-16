@@ -12,7 +12,7 @@ export default function LessonSidebar({ path, current }: { path: Path; current: 
     <nav aria-label="Course outline" className="text-sm">
       <Link
         href={`/paths/${path.slug}`}
-        className="font-display text-lg leading-snug text-text hover:text-accent"
+        className="text-base font-medium leading-snug text-text hover:text-accent"
       >
         {path.title}
       </Link>

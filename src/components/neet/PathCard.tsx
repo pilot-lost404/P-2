@@ -14,15 +14,18 @@ export default function PathCard({ path }: { path: Path }) {
     <SpotlightCard className="h-full">
       <Link href={`/paths/${path.slug}`} className="flex h-full flex-col p-7">
         <div className="flex items-center justify-between">
-          <span className="rounded-full bg-bg px-3 py-1 text-xs font-medium text-text shadow-[var(--shadow-soft)]">
+          <span className="rounded-full bg-bg px-3 py-1 text-xs font-medium text-text">
             {DISCIPLINES[path.discipline].label}
           </span>
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-bg text-text shadow-[var(--shadow-soft)] transition group-hover:bg-ink group-hover:text-bg">
+          <span
+            aria-hidden
+            className="grid h-8 w-8 place-items-center rounded-full text-muted transition-colors group-hover:bg-ink group-hover:text-bg"
+          >
             ↗
           </span>
         </div>
-        <h3 className="mt-8 text-2xl font-semibold leading-snug text-text">{path.title}</h3>
-        <p className="mt-2 flex-1 text-muted">{path.tagline}</p>
+        <h3 className="mt-7 text-xl font-semibold leading-snug text-text">{path.title}</h3>
+        <p className="mt-2 flex-1 text-sm leading-6 text-muted">{path.tagline}</p>
         <div className="mt-6 flex flex-wrap gap-2 text-xs text-muted">
           <span className="rounded-full bg-surface-2 px-2.5 py-1">{path.level}</span>
           <span className="rounded-full bg-surface-2 px-2.5 py-1">{p.total} lessons</span>

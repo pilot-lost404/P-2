@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage } from "@/hooks/use-session";
+import { supabaseConfigured } from "@/lib/neet/supabase-env";
 import { pageHead } from "@/lib/neet/meta";
 
 const search = z.object({
@@ -33,6 +34,7 @@ function AuthPage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!supabaseConfigured) return;
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: safeRedirect(redirect), replace: true });
     });
@@ -48,6 +50,12 @@ function AuthPage() {
       return setError("Password must be at least 8 characters.");
     if (mode === "signup" && !name.trim())
       return setError("Tell us your name — your signature is made from your initials.");
+    if (!supabaseConfigured) {
+      setError(
+        "Accounts aren't configured on this deployment yet. You can still learn — progress is saved in this browser.",
+      );
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "signin") {

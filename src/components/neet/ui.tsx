@@ -11,9 +11,9 @@ export function PageHeader({
 }) {
   return (
     <header className="max-w-3xl">
-      <p className="text-sm font-medium text-accent">{eyebrow}</p>
-      <h1 className="mt-1 text-4xl font-semibold leading-tight md:text-5xl">{title}</h1>
-      {children && <div className="mt-4 text-lg leading-8 text-muted">{children}</div>}
+      <p className="font-label text-sm uppercase tracking-widest text-accent">{eyebrow}</p>
+      <h1 className="mt-2 text-4xl font-semibold md:text-5xl">{title}</h1>
+      {children && <div className="measure mt-4 text-lg leading-8 text-muted">{children}</div>}
     </header>
   );
 }
@@ -48,7 +48,7 @@ export function SearchField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-full border border-line bg-surface py-3 pl-11 pr-4 text-text outline-none transition placeholder:text-muted focus:border-accent focus:bg-bg"
+        className="w-full rounded-full border border-line bg-surface py-3 pl-11 pr-4 text-base text-text outline-none transition placeholder:text-muted focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:bg-bg"
       />
     </label>
   );
@@ -68,8 +68,13 @@ export function Chip({
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition ${active ? "bg-ink text-bg" : "bg-surface-2 text-text hover:bg-line"}`}
+      className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm transition-colors ${
+        active
+          ? "bg-ink font-medium text-bg"
+          : "border border-line bg-bg text-text hover:border-accent hover:bg-surface"
+      }`}
     >
+      {active && <span aria-hidden>✓</span>}
       {children}
     </button>
   );
@@ -79,7 +84,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
   if (!children) return null;
   return (
     <div>
-      <dt className="text-xs font-medium uppercase tracking-wide text-muted">{label}</dt>
+      <dt className="font-label text-xs uppercase tracking-wide text-muted">{label}</dt>
       <dd className="mt-0.5 text-sm leading-6 text-text">{children}</dd>
     </div>
   );
@@ -92,10 +97,19 @@ export function Empty({ children }: { children: ReactNode }) {
 export function LoadError({ error }: { error: unknown }) {
   return (
     <div role="alert" className="mx-auto max-w-xl px-5 py-24 text-center">
-      <h1 className="text-3xl font-semibold">Couldn&apos;t load this page</h1>
+      <p className="font-label text-sm uppercase tracking-widest text-accent">Error</p>
+      <h1 className="mt-2 text-3xl font-semibold">Couldn&apos;t load this page</h1>
       <p className="mt-3 text-muted">
         {error instanceof Error ? error.message : "Please try again."}
       </p>
+      <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <button type="button" className="btn-ink text-sm" onClick={() => window.location.reload()}>
+          Try again
+        </button>
+        <a href="/" className="btn-soft text-sm">
+          Go home
+        </a>
+      </div>
     </div>
   );
 }

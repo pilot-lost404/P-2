@@ -30,7 +30,7 @@ export default function RoadmapAccordion({ path }: { path: Path }) {
                   {String(mi + 1).padStart(2, "0")}
                 </span>
                 <span className="flex-1">
-                  <span className="block font-display text-xl text-text">{m.title}</span>
+                  <span className="block text-lg font-semibold text-text">{m.title}</span>
                   <span className="block text-sm text-muted">{m.summary}</span>
                 </span>
                 <span className="font-label text-xs text-muted">

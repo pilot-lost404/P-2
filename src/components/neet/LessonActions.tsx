@@ -36,10 +36,10 @@ export default function LessonActions({ pathSlug, lessonSlug, skillId, prev, nex
   const [rating, setRating] = useState(0);
 
   return (
-    <div className="mt-14 max-w-[68ch] space-y-8">
+    <div className="mt-14 measure space-y-8">
       <section aria-labelledby="explain" className="rounded-3xl bg-surface p-6">
         <p className="font-label text-xs uppercase tracking-widest text-accent">Explain it back</p>
-        <h2 id="explain" className="mt-2 font-display text-xl">
+        <h2 id="explain" className="mt-2 text-lg font-semibold">
           Say it in your own words.
         </h2>
         <p className="mt-1 text-sm text-muted">

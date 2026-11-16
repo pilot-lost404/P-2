@@ -33,7 +33,7 @@ export default function SkillMap({ compact = false }: { compact?: boolean }) {
                   <StageRing level={lvl(s.id) as 0} size={56} locked={locked && lvl(s.id) === 0} />
                   <div className="flex-1">
                     <p
-                      className={`font-display text-lg ${locked && lvl(s.id) === 0 ? "text-muted" : "text-text"}`}
+                      className={`font-medium ${locked && lvl(s.id) === 0 ? "text-muted" : "text-text"}`}
                     >
                       {s.title}
                     </p>

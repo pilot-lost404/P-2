@@ -3,6 +3,7 @@ import { DISCIPLINES, PATHS, STAGES, SKILLS } from "@/lib/neet/content";
 import { pathProgress } from "@/lib/neet/derive";
 import { calibration, computeAll, disciplineScores, nextBestStep } from "@/lib/neet/scale";
 import { actions, useHydrated, useProgress } from "@/lib/neet/store";
+import { useMe } from "@/hooks/use-me";
 import ProgressBar from "./ProgressBar";
 import SkillMap from "./SkillMap";
 import SkillRadar from "./SkillRadar";
@@ -10,6 +11,7 @@ import SkillRadar from "./SkillRadar";
 export default function Dashboard() {
   const hydrated = useHydrated();
   const { evidence, completed, saved } = useProgress();
+  const { me } = useMe();
 
   if (!hydrated) {
     return (
@@ -26,6 +28,9 @@ export default function Dashboard() {
   }
 
   const progress = computeAll(evidence);
+  // Honest scope label: the radar is built from this browser's evidence unless the
+  // account actually returned scored evidence rows.
+  const syncedEvidence = (me?.events ?? []).filter((e) => e.score !== null).length;
   const scores = disciplineScores(progress);
   const next = nextBestStep(progress, completed);
   const cal = calibration(evidence);
@@ -35,20 +40,16 @@ export default function Dashboard() {
     <div className="space-y-8">
       {empty && (
         <div className="rounded-xl border border-dashed border-accent-dim bg-surface p-8 text-center">
-          <h2 className="font-display text-2xl">Nothing here yet.</h2>
+          <h2 className="text-2xl font-semibold">Nothing here yet.</h2>
           <p className="mx-auto mt-2 max-w-md text-muted">
             Your scale fills in as you answer questions and submit lab evidence. Start a lesson, or
             load sample data to see how it looks.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
-            <Link href="/paths" className="btn-ink ">
+            <Link href="/paths" className="btn-ink">
               Browse paths
             </Link>
-            <button
-              type="button"
-              onClick={actions.loadDemo}
-              className="rounded-md border border-line px-5 py-2.5 text-text hover:border-accent-dim"
-            >
+            <button type="button" onClick={actions.loadDemo} className="btn-soft text-sm">
               Load sample data
             </button>
           </div>
@@ -57,6 +58,11 @@ export default function Dashboard() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
         <section aria-labelledby="radar-h" className="rounded-3xl bg-surface p-6">
+          {syncedEvidence > 0 && (
+            <p className="mb-2 text-xs text-muted">
+              Includes {syncedEvidence} evidence rows from your account.
+            </p>
+          )}
           <h2 id="radar-h" className="font-label text-sm uppercase tracking-widest text-accent">
             Discipline scores
           </h2>
@@ -64,7 +70,9 @@ export default function Dashboard() {
           <ul className="mt-4 grid grid-cols-3 gap-2 text-center">
             {(Object.keys(DISCIPLINES) as (keyof typeof DISCIPLINES)[]).map((d) => (
               <li key={d}>
-                <p className="font-display text-3xl text-text">{Math.round(scores[d])}</p>
+                <p className="text-3xl font-semibold tabular-nums text-text">
+                  {Math.round(scores[d])}
+                </p>
                 <p className="text-xs text-muted">{DISCIPLINES[d].label}</p>
               </li>
             ))}
@@ -79,9 +87,9 @@ export default function Dashboard() {
             <h2 id="next-h" className="font-label text-sm uppercase tracking-widest text-accent">
               Next best step
             </h2>
-            <p className="mt-3 font-display text-2xl text-text">{next.title}</p>
+            <p className="mt-3 text-xl font-semibold text-text">{next.title}</p>
             <p className="mt-1 text-muted">{next.reason}</p>
-            <Link href={next.href} className="mt-4 inline-block btn-ink ">
+            <Link href={next.href} className="mt-4 inline-flex btn-ink">
               {next.kind === "lab"
                 ? "Open the lab"
                 : next.kind === "review"
@@ -103,7 +111,7 @@ export default function Dashboard() {
             ) : (
               <>
                 <p className="mt-3 text-text">
-                  <span className="font-display text-3xl">
+                  <span className="text-3xl font-semibold tabular-nums">
                     {cal.gap >= 0 ? "+" : ""}
                     {Math.round(cal.gap * 100)}
                   </span>
@@ -185,7 +193,7 @@ export default function Dashboard() {
       </section>
 
       <section aria-labelledby="map-h">
-        <h2 id="map-h" className="mb-5 font-display text-2xl">
+        <h2 id="map-h" className="mb-5 text-xl font-semibold">
           Your curriculum map
         </h2>
         <SkillMap compact />
