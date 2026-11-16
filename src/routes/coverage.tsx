@@ -121,12 +121,21 @@ function Coverage() {
                 {String(pm["primary_research_workflow"] ?? "")}
               </Field>
             </dl>
-            <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted">Notes</p>
+            <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted">
+              What this pack is, and what it is not
+            </p>
             <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-6">
               {notes.map((n) => (
                 <li key={n}>{n}</li>
               ))}
             </ul>
+            <p className="mt-4 text-sm text-muted">
+              Counts in this snapshot are reconciled by hand. The per-pass reconciliation history
+              (252 → 275 → 283 → 292 → 320 → 322 sources) is a build log, not a claim about the
+              current pack, so it lives in <code>PACK_CHANGELOG.md</code> in the repository rather
+              than on this page. A source appearing in the register is not proof that its full text
+              was reviewed — that is what the audit tab is for.
+            </p>
             <details className="mt-6">
               <summary className="cursor-pointer text-sm font-medium">
                 Portal entity schema (JSON)

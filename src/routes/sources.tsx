@@ -133,6 +133,11 @@ function Sources() {
         {sources.length} records. Each row shows how far it was actually read — a source in the
         register is not proof its content was reviewed.
       </PageHeader>
+      <p className="measure mt-4 rounded-2xl bg-surface-2 px-4 py-3 text-sm leading-6 text-text">
+        Normative standards are licensed or paywalled. Where a standard is cited, this pack
+        summarises its scope and does not reproduce its text. Check the current edition with the
+        issuing body before relying on any requirement.
+      </p>
 
       <div className="mt-8 space-y-4">
         <SearchField
