@@ -1,6 +1,7 @@
 /**
- * Auto-generated Enriched Source Index
+ * Auto-generated Enriched Source Index — regenerate with scripts/generate_source_enrichment.js.
  * Maps 320 knowledge sources and 162 audit items to pack volumes, domain topics, abstracts and practical takeaways.
+ * Reads content/pack/ (the single source of truth); SS_content/ was a byte-identical copy and is gone.
  */
 
 export interface EnrichedSourceAudit {
@@ -14270,21 +14271,18 @@ export function getSourcesForArticle(
   const clean = slugOrFilename.replace(/\.md$/, "").toLowerCase().replace(/_/g, "-");
   const indexedIds = ARTICLE_TO_SOURCES[clean] || [];
 
+  // Explicit S-ids in the body outrank the curated index: an article that cites S04
+  // should show S04 even if the index was built before that citation was added.
   const directIds: string[] = [];
   if (articleBody) {
-    const sMatches = articleBody.match(/\bS\d{2,3}\b/g) || [];
-    sMatches.forEach((sid) => {
+    for (const sid of articleBody.match(/\bS\d{2,3}\b/g) || []) {
       if (!directIds.includes(sid)) directIds.push(sid);
-    });
-    // Check aliases
+    }
     for (const [alias, sid] of Object.entries(CITATION_ALIASES)) {
-      if (articleBody.includes(alias) && !directIds.includes(sid)) {
-        directIds.push(sid);
-      }
+      if (articleBody.includes(alias) && !directIds.includes(sid)) directIds.push(sid);
     }
   }
 
-  // Combine direct IDs first, then indexed IDs
   const combinedIds = Array.from(new Set([...directIds, ...indexedIds]));
   return combinedIds.map((id) => ENRICHED_SOURCES[id]).filter(Boolean) as EnrichedSource[];
 }

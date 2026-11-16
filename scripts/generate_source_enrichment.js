@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { execFileSync } from "child_process";
 
 function parseCSV(text) {
   const rows = [];
@@ -38,16 +39,16 @@ function parseCSV(text) {
   return rows;
 }
 
-const sourceRows = parseCSV(fs.readFileSync("SS_content/sources.csv", "utf8")).slice(1);
-const auditRows = parseCSV(fs.readFileSync("SS_content/DEEP_SCRAPE_AUDIT.csv", "utf8")).slice(1);
+const sourceRows = parseCSV(fs.readFileSync("content/pack/sources.csv", "utf8")).slice(1);
+const auditRows = parseCSV(fs.readFileSync("content/pack/DEEP_SCRAPE_AUDIT.csv", "utf8")).slice(1);
 const mdFiles = fs
-  .readdirSync("SS_content")
+  .readdirSync("content/pack")
   .filter((f) => f.endsWith(".md") && f !== "CONTENT_IMPORT_GUIDE.md");
 
 // Build file metadata
 const fileMeta = [];
 mdFiles.forEach((f) => {
-  const text = fs.readFileSync(path.join("SS_content", f), "utf8");
+  const text = fs.readFileSync(path.join("content/pack", f), "utf8");
   const h1Match = text.match(/^#\s+(.+)$/m);
   const title = h1Match ? h1Match[1].trim() : f.replace(/\.md$/, "");
   const numMatch = f.match(/^(\d+)_/);
@@ -360,8 +361,9 @@ console.log("Sample enriched source 1:", JSON.stringify(enrichedSources[0], null
 
 // Generate TypeScript file content
 const tsContent = `/**
- * Auto-generated Enriched Source Index
+ * Auto-generated Enriched Source Index — regenerate with scripts/generate_source_enrichment.js.
  * Maps 320 knowledge sources and 162 audit items to pack volumes, domain topics, abstracts and practical takeaways.
+ * Reads content/pack/ (the single source of truth); SS_content/ was a byte-identical copy and is gone.
  */
 
 export interface EnrichedSourceAudit {
@@ -442,12 +444,40 @@ export function getEnrichedSource(id: string): EnrichedSource | undefined {
   return undefined;
 }
 
-export function getSourcesForArticle(slugOrFilename: string): EnrichedSource[] {
+export function getSourcesForArticle(
+  slugOrFilename: string,
+  articleBody?: string,
+): EnrichedSource[] {
   const clean = slugOrFilename.replace(/\\.md$/, "").toLowerCase().replace(/_/g, "-");
-  const sourceIds = ARTICLE_TO_SOURCES[clean] || [];
-  return sourceIds.map((id) => ENRICHED_SOURCES[id]).filter(Boolean) as EnrichedSource[];
+  const indexedIds = ARTICLE_TO_SOURCES[clean] || [];
+
+  // Explicit S-ids in the body outrank the curated index: an article that cites S04
+  // should show S04 even if the index was built before that citation was added.
+  const directIds: string[] = [];
+  if (articleBody) {
+    for (const sid of articleBody.match(/\\bS\\d{2,3}\\b/g) || []) {
+      if (!directIds.includes(sid)) directIds.push(sid);
+    }
+    for (const [alias, sid] of Object.entries(CITATION_ALIASES)) {
+      if (articleBody.includes(alias) && !directIds.includes(sid)) directIds.push(sid);
+    }
+  }
+
+  const combinedIds = Array.from(new Set([...directIds, ...indexedIds]));
+  return combinedIds.map((id) => ENRICHED_SOURCES[id]).filter(Boolean) as EnrichedSource[];
 }
 `;
 
 fs.writeFileSync("src/lib/neet/sourceEnrichment.ts", tsContent, "utf8");
+
+// The template is JSON.stringify output (quoted keys, long lines), but the repo lints
+// with prettier/prettier on every file. Format what we just wrote so regenerating the
+// index never turns `npm run lint` red. Skipped quietly if prettier isn't installed.
+try {
+  execFileSync("npx", ["prettier", "--write", "src/lib/neet/sourceEnrichment.ts"], {
+    stdio: "ignore",
+  });
+} catch {
+  console.warn("prettier not available; run `npx prettier --write` on the generated file.");
+}
 console.log("Successfully wrote src/lib/neet/sourceEnrichment.ts!");
