@@ -21,16 +21,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { supabaseConfigured } from "@/lib/neet/supabase-env";
 
 function NotFoundComponent() {
+  // The real 404 page lives at /404 so it can also be linked to directly; the root
+  // boundary is only reached by unmatched paths, so render the same content inline.
   return (
-    <div className="mx-auto max-w-2xl px-5 py-32 text-center">
+    <div className="mx-auto max-w-2xl px-5 py-24 text-center">
       <p className="font-label text-sm uppercase tracking-widest text-accent">404</p>
-      <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Off the map.</h1>
+      <h1 className="mt-2 text-4xl font-semibold md:text-5xl">Off the map.</h1>
       <p className="mt-4 text-muted">
-        That page does not exist. Try the paths, or press ⌘K to search.
+        That page doesn&apos;t exist. Try the paths, or press ⌘K to search.
       </p>
-      <Link to="/paths" className="mt-8 inline-flex btn-ink">
-        Browse paths
-      </Link>
+      <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <Link to="/paths" className="btn-ink text-sm">
+          Browse paths
+        </Link>
+        <Link to="/library" className="btn-soft text-sm">
+          Search the library
+        </Link>
+      </div>
     </div>
   );
 }

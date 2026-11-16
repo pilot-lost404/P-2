@@ -1,6 +1,6 @@
 # NEET — systems thinking, system design, systems engineering
 
-> **NEET** here means *we ain't an academy, we're a group*. It is **not** the medical
+> **NEET** here means _we ain't an academy, we're a group_. It is **not** the medical
 > entrance exam and **not** the "Not in Education, Employment, or Training" policy label.
 
 A learning site: 11 paths / 26 lessons / 10 practice labs across three disciplines, backed
@@ -19,12 +19,14 @@ runs in **local mode**: progress lives in this browser and in an in-memory serve
 `/auth` explains that accounts aren't configured. With credentials present, sessions are
 verified server-side and progress syncs.
 
-| Command | What it proves |
-| --- | --- |
-| `npx tsc --noEmit` | Types are clean (strict + `exactOptionalPropertyTypes`). |
-| `npx vitest run` | 3 files / 18 tests: pack integrity, routing, mastery maths. |
-| `npx eslint .` | 0 errors (8 warnings, all pre-existing shadcn `react-refresh`). |
-| `npx vite build` | Production build for Cloudflare Workers. |
+| Command            | What it proves                                                  |
+| ------------------ | --------------------------------------------------------------- |
+| `npx tsc --noEmit` | Types are clean (strict + `exactOptionalPropertyTypes`).        |
+| `npx vitest run`   | 3 files / 18 tests: pack integrity, routing, mastery maths.     |
+| `npx eslint .`     | 0 errors (8 warnings, all pre-existing shadcn `react-refresh`). |
+| `npx vite build`   | Production build for Cloudflare Workers.                        |
+| `npm run verify`   | All four in one command.                                        |
+| `npm run pack`     | Regenerate the pack tables after editing `content/pack/`.       |
 
 ## How content works
 
@@ -55,7 +57,7 @@ of markdown into the browser bundle.
 - **Auth** — every account function runs behind `accountAuth`. A bearer token is only
   trusted after Supabase `getClaims()` verifies signature and expiry; no token means 401.
   There is no hand-rolled JWT parsing and no shared fallback user.
-- **Progress** — `ProgressSync` pushes activity *and* scored evidence (`score`,
+- **Progress** — `ProgressSync` pushes activity _and_ scored evidence (`score`,
   `confidence`, `weight`, `skill_id`), retries on failure and reconnect, backfills once per
   browser, and merges the account's evidence back into the local store on load. Mastery is
   therefore reproducible on a second device instead of resetting to zero.
@@ -63,7 +65,12 @@ of markdown into the browser bundle.
   partially read / found, not fully read / couldn't reach / not audited), derived from
   `DEEP_SCRAPE_AUDIT.csv`. A citation is never presented as proof of review.
 - **Access** — `/me`, `/me/calibration` and `/learn/...` are public. Signing in adds sync; it
-  is not a gate on the curriculum.
+  is not a gate on the curriculum. Security lives in server-function middleware, never in
+  `beforeLoad`: every `createServerFn` is a public HTTP endpoint.
+- **Discoverability** — `src/routes/sitemap[.]xml.ts` serves 167 URLs built from the pack
+  (the bracketed filename escapes the dot for TanStack Router). Decorative scaffold
+  components were removed down to the 11 actually used, which dropped 28 runtime
+  dependencies.
 
 ## Design system
 

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as R404RouteImport } from './routes/404'
 import { Route as PublicAccountRouteImport } from './routes/_public-account'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CareersRouteImport } from './routes/careers'
@@ -19,6 +20,7 @@ import { Route as HealthRouteImport } from './routes/health'
 import { Route as LabsRouteImport } from './routes/labs'
 import { Route as MethodRouteImport } from './routes/method'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SourcesRouteImport } from './routes/sources'
 import { Route as LibraryIndexRouteImport } from './routes/library.index'
 import { Route as LibrarySlugRouteImport } from './routes/library.$slug'
@@ -31,6 +33,11 @@ import { Route as PublicAccountLearnPathLessonRouteImport } from './routes/_publ
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R404Route = R404RouteImport.update({
+  id: '/404',
+  path: '/404',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicAccountRoute = PublicAccountRouteImport.update({
@@ -75,6 +82,11 @@ const MethodRoute = MethodRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SourcesRoute = SourcesRouteImport.update({
@@ -122,6 +134,7 @@ const PublicAccountLearnPathLessonRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/auth': typeof AuthRoute
   '/careers': typeof CareersRoute
   '/coverage': typeof CoverageRoute
@@ -130,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/labs': typeof LabsRoute
   '/method': typeof MethodRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sources': typeof SourcesRoute
   '/library/$slug': typeof LibrarySlugRoute
   '/paths/$slug': typeof PathsSlugRoute
@@ -141,6 +155,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/auth': typeof AuthRoute
   '/careers': typeof CareersRoute
   '/coverage': typeof CoverageRoute
@@ -149,6 +164,7 @@ export interface FileRoutesByTo {
   '/labs': typeof LabsRoute
   '/method': typeof MethodRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sources': typeof SourcesRoute
   '/library/$slug': typeof LibrarySlugRoute
   '/paths/$slug': typeof PathsSlugRoute
@@ -161,6 +177,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/_public-account': typeof PublicAccountRouteWithChildren
   '/auth': typeof AuthRoute
   '/careers': typeof CareersRoute
@@ -170,6 +187,7 @@ export interface FileRoutesById {
   '/labs': typeof LabsRoute
   '/method': typeof MethodRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sources': typeof SourcesRoute
   '/library/$slug': typeof LibrarySlugRoute
   '/paths/$slug': typeof PathsSlugRoute
@@ -183,6 +201,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/404'
     | '/auth'
     | '/careers'
     | '/coverage'
@@ -191,6 +210,7 @@ export interface FileRouteTypes {
     | '/labs'
     | '/method'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/sources'
     | '/library/$slug'
     | '/paths/$slug'
@@ -202,6 +222,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/404'
     | '/auth'
     | '/careers'
     | '/coverage'
@@ -210,6 +231,7 @@ export interface FileRouteTypes {
     | '/labs'
     | '/method'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/sources'
     | '/library/$slug'
     | '/paths/$slug'
@@ -221,6 +243,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/404'
     | '/_public-account'
     | '/auth'
     | '/careers'
@@ -230,6 +253,7 @@ export interface FileRouteTypes {
     | '/labs'
     | '/method'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/sources'
     | '/library/$slug'
     | '/paths/$slug'
@@ -242,6 +266,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  R404Route: typeof R404Route
   PublicAccountRoute: typeof PublicAccountRouteWithChildren
   AuthRoute: typeof AuthRoute
   CareersRoute: typeof CareersRoute
@@ -251,6 +276,7 @@ export interface RootRouteChildren {
   LabsRoute: typeof LabsRoute
   MethodRoute: typeof MethodRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SourcesRoute: typeof SourcesRoute
   LibrarySlugRoute: typeof LibrarySlugRoute
   PathsSlugRoute: typeof PathsSlugRoute
@@ -265,6 +291,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/404': {
+      id: '/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof R404RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public-account': {
@@ -328,6 +361,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sources': {
@@ -407,6 +447,7 @@ const PublicAccountRouteWithChildren = PublicAccountRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  R404Route: R404Route,
   PublicAccountRoute: PublicAccountRouteWithChildren,
   AuthRoute: AuthRoute,
   CareersRoute: CareersRoute,
@@ -416,6 +457,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabsRoute: LabsRoute,
   MethodRoute: MethodRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SourcesRoute: SourcesRoute,
   LibrarySlugRoute: LibrarySlugRoute,
   PathsSlugRoute: PathsSlugRoute,
